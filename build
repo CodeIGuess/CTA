@@ -1,0 +1,12 @@
+#!/bin/bash
+echo Building...
+/opt/homebrew/bin/g++-10 -g graphics.cpp -o graphics -framework OpenGL /opt/homebrew/Cellar/glfw/3.3.4/lib/libglfw.3.3.dylib
+if [ $? -eq 0 ]; then
+    echo Build done!
+    echo Running...
+    ./graphics
+    echo Ran.
+else
+    echo Build failed
+fi
+echo 

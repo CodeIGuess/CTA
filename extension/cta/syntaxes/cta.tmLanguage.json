@@ -1,0 +1,59 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "CTA Programming Language",
+	"patterns": [
+		{ "include": "#keywords" },
+		{ "include": "#strings" },
+		{ "include": "#comments" },
+		{ "include": "#numbers" },
+		{ "include": "#calls" },
+		{ "include": "#variables" },
+		{ "include": "#operators" }
+	],
+	"repository": {
+		"keywords": {
+			"patterns": [{
+				"name": "keyword.control.cta",
+				"match": "\\b(if|while|for|return|scan)\\b"
+			}, {
+				"name": "keyword.type.cta",
+				"match": "\\b(str|int|flt|dbl|def|true|false)\\b"
+			}]
+		},
+		"strings": {
+			"name": "string.quoted.double.cta",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.cta",
+					"match": "\\\\."
+				}
+			]
+		},
+		"comments": {
+			"name": "comment.cta",
+			"begin": "(#.*$)",
+			"end": "(?=^)"
+		},
+		"numbers": {
+			"patterns": [{
+				"name": "constant.numeric.decimal.cta",
+				"match": "(?<![a-zA-Z_])(\\d+\\.\\d+|\\.\\d+|\\d+\\.|\\d+)"
+			}]
+		},
+		"calls": {
+			"patterns": [{
+				"name": "entity.name.function.cta",
+				"match": "([a-zA-Z_]+[a-zA-Z0123456789_]*)(?=\\()"
+			}]
+		},
+		"variables": {
+			"patterns": [{
+				"name": "entity.name.variable.cta",
+				"match": "([a-zA-Z_]+[a-zA-Z0123456789_]*)"
+			}]
+		}
+	},
+	"scopeName": "source.cta"
+}

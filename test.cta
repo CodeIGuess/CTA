@@ -1,0 +1,29 @@
+
+flt@ a = [0, 1, 2] / 2
+print(a)
+
+# Remember to check for JSON.stringify in errors!
+
+# def fib(int number) {
+#     flt n1 = 0
+#     flt n2 = 1
+#     flt nextTerm
+#     print("\nFibonacci: \n")
+#     for (int a = 0, a < number) {
+#         print(n1, "")
+#         nextTerm = n1 + n2
+#         n1 = n2
+#         n2 = nextTerm
+#     }
+# }
+# fib(10)
+
+# Errors to check for:
+#print(0 0)
+#print(2 + (3 4))
+#print((3 4) + 2)
+#(4 + 2 "hey")
+#int a = ((3, 0) + 2)
+#a int = 0
+#hey, mate
+#-1 # should work
