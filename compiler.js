@@ -157,7 +157,7 @@ function warn(message) {
 
 function save(code, name) {
     fs.writeFile(name + ".cpp", code, "utf8", function fileWrite(){
-        exec(`g++ -std=c++11 -stdlib=libc++ ${name}.cpp ${process.argv.splice(3).join(" ")}`, function compile(err) {
+        exec(`g++ -std=c++11 ${name}.cpp ${process.argv.splice(3).join(" ")}`, function compile(err) { // -stdlib=libc++
             if (err) {
                 error(err)
             }

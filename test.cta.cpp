@@ -8,10 +8,12 @@
 #include "./headers/ctasl.h"
 using namespace std;
 
-class Entity;
+int a;
 
 int main() {
-    Entity = int x int y;
+    a = 0;
+    a += 1;
+    print(a);
     std::cout << '\n';
     return 0;
 }

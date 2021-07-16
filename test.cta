@@ -1,8 +1,12 @@
 
-cls Entity {
-    int x
-    int y
-}
+# cls Entity {
+#     int x
+#     int y
+# }
+
+int a = 0
+a += 1
+print(a)
 
 # Remember to check for JSON.stringify in errors!
 
