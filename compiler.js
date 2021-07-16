@@ -2,12 +2,20 @@
 
 // /opt/homebrew/Cellar/glfw/3.3.4
 
-let vNum = "1.1.1"
+// Copy extension to VSCode
+// cp -r extension/cta ~/.vscode/extensions
 
-let varTypes = ["int", "str", "flt", "dbl", "def"]
+let vNum = "1.3.2"
+
+let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
 
-let keyWords = ["return", "break", "continue"]
+let keyWords = ["return", "break", "continue", "class"]
+
+let predefinedVals = {
+    "true": { type: 'num', content: '1'},
+    "false": { type: 'num', content: '0'}
+}
 
 let fullTokenNames = {
     "num": "number",
@@ -31,7 +39,8 @@ let lTypesToCTypes = {
     "str": "string",
     "flt": "float",
     "dbl": "double",
-    "def": "void"
+    "def": "void",
+    "cls": "class"
 }
 
 let stats = {
@@ -163,9 +172,9 @@ function compile(program) {
     modify        (ast)
     operations    (ast)
     variables     (ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
     control       (ast)
     adjacentTokens(ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast;
     //getVarType(ast, ".content.0.arguments.0.0.arguments.0")
@@ -555,7 +564,16 @@ function control(ast) {
         } else if (p.type == "call") {
             p.arguments = p.arguments.map(e => control({content: e}).content)
         } else if (p.type == "declare") { // This could mess things up!
-            if (p.content.content) {
+            if (p.content.type == "clsType") {
+                let type = modified[c].type
+                if (type == "block") {
+                    control(modified[c])
+                    p.content.content = modified[c].content
+                    modified.splice(c, 1)
+                } else {
+                    error(`Found ${fullTokenNames[type]} after class declaration.`, modified[c])
+                }
+            } else if (p.content.content) {
                 p.content.content = p.content.content.map(e => control({content: e}).content)
             }
         } else if (p.type == "ctrl") {
@@ -767,6 +785,7 @@ function generate(node, parentType="") {
             if (![...keyWords].includes(node.content)) {
                 let varType = getVarType(fullAst, node.path, node.content)
                 if (varType == undefined) error(`Variable \`${node.content}\` not declared`)
+                if (varType == "pred") return predefinedVals[node.content].content
                 checkedVariableType = varType
             }
             return node.content
@@ -774,7 +793,7 @@ function generate(node, parentType="") {
             lastVariableType = node.content.type.replace('Type', '')
             let varType = lTypesToCTypes[lastVariableType]
             if (node.array) {
-                varType = `Array<${varType}>`//`vector<${varType}>`
+                varType = `Array<${varType}>`
             }
             let declaration
             let setting
@@ -876,6 +895,7 @@ function getVar(ast, path, nam) {
 }
 
 function getVarType(ast, path, nam) {
+    if (Object.keys(predefinedVals).includes(nam)) return "pred"
     let node = getVar(ast, path, getPath(ast, path).content)
     if (node == undefined) return undefined
     if (node.array) return "arr"

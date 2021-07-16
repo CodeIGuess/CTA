@@ -8,11 +8,10 @@
 #include "./headers/ctasl.h"
 using namespace std;
 
-Array<float> a;
+class Entity;
 
 int main() {
-    a = _div(Array<float>(vector<float>{0, 1, 2}), 2);
-    print(a);
+    Entity = int x int y;
     std::cout << '\n';
     return 0;
 }

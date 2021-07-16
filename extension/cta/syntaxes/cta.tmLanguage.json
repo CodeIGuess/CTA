@@ -14,10 +14,10 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.cta",
-				"match": "\\b(if|while|for|return|scan)\\b"
+				"match": "\\b(if|while|for|return|scan|continue|break)\\b"
 			}, {
 				"name": "keyword.type.cta",
-				"match": "\\b(str|int|flt|dbl|def|true|false)\\b"
+				"match": "\\b(str|int|flt|dbl|def|true|false|cls)\\b"
 			}]
 		},
 		"strings": {

@@ -111,4 +111,11 @@ class Array {
         }
 };
 
+class Dictionary {
+    public:
+        Dictionary() {
+
+        }
+};
+
 #endif

@@ -1,6 +1,8 @@
 
-flt@ a = [0, 1, 2] / 2
-print(a)
+cls Entity {
+    int x
+    int y
+}
 
 # Remember to check for JSON.stringify in errors!
 
