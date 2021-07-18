@@ -174,7 +174,7 @@ function compile(program) {
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
+    // console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast;
     //getVarType(ast, ".content.0.arguments.0.0.arguments.0")
