@@ -1,12 +1,21 @@
 
-# cls Entity {
-#     int x
-#     int y
-# }
+cls Entity {
+    int x = 5
+    int y = 3
+    int sum() {
+        x + y
+    }
+}
 
-int a = 0
-a += 1
-print(a)
+Entity.sum()
+# This produces an error... Good!
+
+Entity a = 0
+# This doesn't even generate the right code.
+
+
+
+# print("10".toInt() + 10)
 
 # Remember to check for JSON.stringify in errors!
 

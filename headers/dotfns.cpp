@@ -1,14 +1,10 @@
-#include <iostream>
 #include <string>
-#include <algorithm>
-#include <cctype>
 #include <vector>
-#include <unistd.h>
+#include <algorithm>
 #include "./headers/utils.h"
-#include "./headers/ctasl.h"
 using namespace std;
 
-
+// start class
 class _DotFns_ {
     public:
         // String
@@ -55,18 +51,3 @@ class _DotFns_ {
 
         // Extras
 };
-class Entity {
-    public:
-        int x = 5;
-        int y = 3;
-        int sum() {
-            return _sum(x, y);
-        }
-        ;
-};
-
-int main() {
-    // class `Entity`;
-    std::cout << '\n';
-    return 0;
-}
