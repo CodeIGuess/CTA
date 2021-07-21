@@ -1,11 +1,12 @@
-//"use strict";
+// Can't do `use-strict` because error-handling uses `caller`.
 
+// Idk why this is saved here
 // /opt/homebrew/Cellar/glfw/3.3.4
 
-// Copy extension to VSCode
+// Use this to copy extension to VSCode
 // cp -r extension/cta ~/.vscode/extensions
 
-let vNum = "1.3.2"
+let vNum = "1.3.9"
 
 let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
@@ -29,11 +30,6 @@ let fullTokenNames = {
     "def": "function"
 }
 
-let varTypeToClass = {
-    "strType": "String",
-    "arr": "Array"
-}
-
 let lTypesToCTypes = {
     "int": "int",
     "str": "string",
@@ -48,6 +44,11 @@ let stats = {
     "input": "input"
 }
 
+// Currently unused, but should eventually be used.
+// C++'s default content depends on the variable type, but 
+// other languages (like JavaScript or python) just default
+// it to something like `null`, `undefined`, or `None`.
+// This is a big problem. This dict is staying as a reminder.
 let defaultContent = {
     "int": { type: "num", content: "0" },
     "str": { type: "str", content: "" },
@@ -83,21 +84,17 @@ let genCodeLib =
 #include "./headers/utils.h"
 #include "./headers/ctasl.h"
 using namespace std;
-
 `
 
 let functions = ""
 let variableCode = ""
 
-let genCodeStart = `
-int main() {
-`
+let genCodeStart = "\nint main() {\n"
 
 let genCodeEnd = `
     std::cout << '\\n';
     return 0;
-}
-`
+}\n`
 
 let controlFlow = ["if", "while", "for", "scan"]
 
@@ -851,7 +848,7 @@ function checkVarName(name, t="variable", node) {
 }
 
 function addSemicolon(s) {
-    let b = s//.replace(/ /g, "")
+    let b = s
     return (b[b.length - 1] == "}" ? s : s + ';')
 }
 

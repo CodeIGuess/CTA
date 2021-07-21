@@ -9,11 +9,12 @@ cls Entity {
 
 Entity.sum()
 # This produces an error... Good!
+# `sum` isn't a static member (which isn't a thing yet, but still)
+# so it shouldn't be able to be called.
+# However, it doesn't throw the right error.
 
 Entity a = 0
 # This doesn't even generate the right code.
-
-
 
 # print("10".toInt() + 10)
 
@@ -35,10 +36,7 @@ Entity a = 0
 
 # Errors to check for:
 #print(0 0)
-#print(2 + (3 4))
-#print((3 4) + 2)
 #(4 + 2 "hey")
 #int a = ((3, 0) + 2)
 #a int = 0
-#hey, mate
-#-1 # should work
+#-1 # should work, doesn't
