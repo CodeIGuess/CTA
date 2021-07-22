@@ -7,13 +7,15 @@ cls Entity {
     }
 }
 
-Entity.sum()
+#Entity.sum()
 # This produces an error... Good!
 # `sum` isn't a static member (which isn't a thing yet, but still)
 # so it shouldn't be able to be called.
 # However, it doesn't throw the right error.
 
-Entity a = 0
+int a = 0
+Entity e
+
 # This doesn't even generate the right code.
 
 # print("10".toInt() + 10)

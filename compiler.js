@@ -6,7 +6,7 @@
 // Use this to copy extension to VSCode
 // cp -r extension/cta ~/.vscode/extensions
 
-let vNum = "1.3.9"
+let vNum = "1.3.99"
 
 let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
@@ -86,6 +86,7 @@ let genCodeLib =
 using namespace std;
 `
 
+let classes = ""
 let functions = ""
 let variableCode = ""
 
@@ -171,21 +172,22 @@ function compile(program, dotfnsfile) {
     let tokens   = tokenize(program)
     let ast      = parse   (tokens)
     modify        (ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     operations    (ast)
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
-    // console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast;
     //getVarType(ast, ".content.0.arguments.0.0.arguments.0")
     let code     = generate(ast)
     code      = indent(code, 1)
-    functions = indent(functions, 0)
+    classes = indent(classes, 0)
     variableCode = indent(variableCode, 0)
+    functions = indent(functions, 0)
 
-    code = genCodeLib + dotfnsfile.split("// start class")[1] + variableCode + functions + genCodeStart + code + genCodeEnd
-    return code
+    code = genCodeLib + dotfnsfile.split("// start class")[1] + "\n" + classes + "\n" + variableCode + "\n" + functions + genCodeStart + code + genCodeEnd
+    return code.replace(/\n\n\n/g, "\n\n")
 }
 
 function tokenize(program) {
@@ -428,6 +430,16 @@ function modify(ast) {
                 }
                 modified.splice(c, 1)
             }
+        } else if (p.type == "clsType") {
+            if (c + 1 > modified.length) error(`Expected something after \`cls\``, p)
+            if (c + 2 > modified.length) error(`Expected something after \`${modified[c].content}\``, modified[c])
+            let addVarType = modified[c].content
+
+            varTypes.push(addVarType)
+            formattedVarTypes.push(addVarType)
+
+            lTypesToCTypes[addVarType] = addVarType
+            modified[c].isMainClassName = true
         }
     }
     return ast
@@ -478,6 +490,8 @@ function operations(ast) {
                 ]
             })
             modified.splice(--c, 3)
+        } else if (p.type == "nam" && varTypes.includes(p.content) && !p.isMainClassName) {
+            p.type = p.content
         }
     }
     return ast
@@ -537,9 +551,9 @@ function variables(ast) {
             checkVarName(p.content.name, "variable")
         } else if (p.type == "nam") {
             if (c >= declaredVars.length) continue
-            if (declaredVars[c].type == "sep") error(`Misplaced separator, the comma doesn't do anything here`)
+            if (declaredVars[c].type == "sep") error(`Misplaced separator, the comma doesn't do anything here.`)
             if (declaredVars[c].type.includes("Type")) error(`No idea what this means. Try swapping \`${p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
-            if (declaredVars[c].type != "opr") error(`No idea what this means`, declaredVars[c])
+            if (declaredVars[c].type != "opr") error(`No idea what this means.`, declaredVars[c])
             if (c >= declaredVars.length - 1) error(`Expected something after \`${declaredVars[c].content}\``)
             checkVarName(p.content, "variable", p)
             p.content = {
@@ -565,7 +579,7 @@ function control(ast) {
             p = control(p)
         } else if (p.type == "call") {
             p.arguments = p.arguments.map(e => control({content: e}).content)
-        } else if (p.type == "declare") { // This could mess things up!
+        } else if (p.type == "declare") {
             if (p.content.type == "clsType") {
                 let type = modified[c].type
                 if (type == "block") {
@@ -578,7 +592,7 @@ function control(ast) {
                 p.name = p.content.name
                 p.type = "class"
                 p.content = p.content.content
-                console.log(p)
+                // console.log(p)
             } else if (p.content.content) {
                 p.content.content = p.content.content.map(e => control({content: e}).content)
             }
@@ -656,7 +670,7 @@ function adjacentTokens(ast) {
                 if (goodTypes.includes(check[c].type)) continue
                 if (p.type == check[c].type) error(`Two ${fullTokenNames[p.type]}s can't be next to each other here.`)
             }
-            console.log(check[c])
+            // console.log(check[c])
             error(`Found \`${fullTokenNames[p.type]}\` next to \`${fullTokenNames[check[c].type]}\`. Try moving one of them somewhere else.`)
         }
     }
@@ -712,7 +726,7 @@ function generate(node, parentType="") {
         case "class":
             let classCode = node.content.map(e => generate(e, "class")).map(addSemicolon)
                 .map(e => e.split("\n").join("\n    "))
-            functions += `class ${node.name} {\n`
+            classes += `class ${node.name} {\n`
                 + "public:\n    "
                 + classCode.join('\n    ')
                 + "\n};\n"

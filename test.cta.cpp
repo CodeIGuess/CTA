@@ -8,7 +8,6 @@
 #include "./headers/ctasl.h"
 using namespace std;
 
-
 class _DotFns_ {
     public:
         // String
@@ -55,6 +54,7 @@ class _DotFns_ {
 
         // Extras
 };
+
 class Entity {
     public:
         int x = 5;
@@ -65,8 +65,13 @@ class Entity {
         ;
 };
 
+int a;
+Entity e;
+
 int main() {
     // class `Entity`;
+    a = 0;
+    // variable `e`;
     std::cout << '\n';
     return 0;
 }
