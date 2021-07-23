@@ -6,12 +6,12 @@
 // Use this to copy extension to VSCode
 // cp -r extension/cta ~/.vscode/extensions
 
-let vNum = "1.3.99"
+let vNum = "1.3.999"
 
 let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
 
-let keyWords = ["return", "break", "continue", "class"]
+let keyWords = ["return", "break", "continue", "class", "this"]
 
 let predefinedVals = {
     "true": { type: 'num', content: '1'},
@@ -36,7 +36,8 @@ let lTypesToCTypes = {
     "flt": "float",
     "dbl": "double",
     "def": "void",
-    "cls": "class"
+    "cls": "class",
+    "ccf": ""
 }
 
 let stats = {
@@ -172,11 +173,11 @@ function compile(program, dotfnsfile) {
     let tokens   = tokenize(program)
     let ast      = parse   (tokens)
     modify        (ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
     operations    (ast)
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast;
     //getVarType(ast, ".content.0.arguments.0.0.arguments.0")
@@ -576,13 +577,26 @@ function control(ast) {
         if (["paren", "arr"].includes(p.type)) {
             p.content = p.content.map(e => control({content: e}).content)
         } else if (p.type == "block") {
+            p.isClassChild = true
             p = control(p)
         } else if (p.type == "call") {
-            p.arguments = p.arguments.map(e => control({content: e}).content)
+            if (ast.isClassChild) {
+                p.type = "function"
+                p.content = {
+                    type: "ccf",
+                    name: p.content,
+                    arguments: []
+                }
+                c -= 1
+                console.log(p)
+            } else {
+                p.arguments = p.arguments.map(e => control({content: e}).content)
+            }
         } else if (p.type == "declare") {
             if (p.content.type == "clsType") {
                 let type = modified[c].type
                 if (type == "block") {
+                    modified[c].isClassChild = true
                     control(modified[c])
                     p.content.content = modified[c].content
                     modified.splice(c, 1)
@@ -606,6 +620,7 @@ function control(ast) {
             }
             modified.splice(c, 1)
         } else if (p.type == "function") {
+            console.log(p)
             let type = modified[c].type
             if (type == "block") {
                 control(modified[c])
@@ -670,7 +685,6 @@ function adjacentTokens(ast) {
                 if (goodTypes.includes(check[c].type)) continue
                 if (p.type == check[c].type) error(`Two ${fullTokenNames[p.type]}s can't be next to each other here.`)
             }
-            // console.log(check[c])
             error(`Found \`${fullTokenNames[p.type]}\` next to \`${fullTokenNames[check[c].type]}\`. Try moving one of them somewhere else.`)
         }
     }
@@ -712,9 +726,9 @@ function generate(node, parentType="") {
             let args = node.content.arguments.map(generate).join(", ")
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
-            if (type != "def")
+            if (!["def", "ccf"].includes(type))
                 code[code.length - 1] = `return ${code[code.length - 1]}`
-            let finalFuncCode = `${lTypesToCTypes[type]} ${node.content.name}(${args}) {\n`
+            let finalFuncCode = `${lTypesToCTypes[type] + (lTypesToCTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) {\n`
                 + code.join('\n')
                 + "\n}\n"
             if (parentType == "class") {
@@ -808,7 +822,6 @@ function generate(node, parentType="") {
         case "paren":
             return `(${node.content.map(generate).join(" ")})`
         case "nam":
-            //console.log("NAM:", node.content)
             if (![...keyWords].includes(node.content)) {
                 let varType = getVarType(fullAst, node.path, node.content)
                 if (varType == undefined) error(`Variable \`${node.content}\` not declared`)
@@ -911,12 +924,10 @@ function getVar(ast, path, nam) {
                     path.push("content")
                     path.push("arguments")
                     path.push("0")
-                    console.log(node.content.arguments)
                     last = node.content.arguments[0].length
                 } else {
                     path.push("arguments")
                     path.push("0")
-                    console.log(node)
                     last = node.arguments[0].length
                 }
                 isNum = true

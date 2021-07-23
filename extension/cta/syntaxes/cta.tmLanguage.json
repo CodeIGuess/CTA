@@ -17,7 +17,7 @@
 				"match": "\\b(if|while|for|return|scan|continue|break)\\b"
 			}, {
 				"name": "keyword.type.cta",
-				"match": "\\b(str|int|flt|dbl|def|true|false|cls)\\b"
+				"match": "\\b(str|int|flt|dbl|def|true|false|cls|this)\\b"
 			}]
 		},
 		"strings": {

@@ -57,21 +57,19 @@ class _DotFns_ {
 
 class Entity {
     public:
-        int x = 5;
-        int y = 3;
-        int sum() {
-            return _sum(x, y);
+        Entity(int a) {
+            print(a);
         }
         ;
+        int x = 5;
+        int y = 3;
 };
 
-int a;
 Entity e;
 
 int main() {
     // class `Entity`;
-    a = 0;
-    // variable `e`;
+    e = Entity(10);
     std::cout << '\n';
     return 0;
 }

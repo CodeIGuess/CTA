@@ -1,20 +1,27 @@
 
 cls Entity {
+    Entity(int a) {
+        print("class input: ", a)
+    }
+    # Remember to add different class constructors!
+
     int x = 5
     int y = 3
-    int sum() {
-        x + y
-    }
+    # int sum() {
+    #     x + y
+    # }
 }
+
+# def a() {
+#     print("a")
+# }
 
 #Entity.sum()
 # This produces an error... Good!
 # `sum` isn't a static member (which isn't a thing yet, but still)
 # so it shouldn't be able to be called.
 # However, it doesn't throw the right error.
-
-int a = 0
-Entity e
+Entity e = Entity()
 
 # This doesn't even generate the right code.
 
