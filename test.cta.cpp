@@ -57,19 +57,18 @@ class _DotFns_ {
 
 class Entity {
     public:
+        Entity() {} 
         Entity(int a) {
-            print(a);
+            print(string("class input: ")); print(a);
         }
         ;
-        int x = 5;
-        int y = 3;
 };
 
 Entity e;
 
 int main() {
     // class `Entity`;
-    e = Entity(10);
+    e = Entity(0);
     std::cout << '\n';
     return 0;
 }

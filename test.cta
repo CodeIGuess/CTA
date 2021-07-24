@@ -5,8 +5,8 @@ cls Entity {
     }
     # Remember to add different class constructors!
 
-    int x = 5
-    int y = 3
+    #int x = 5
+    #int y = 3
     # int sum() {
     #     x + y
     # }
@@ -21,7 +21,7 @@ cls Entity {
 # `sum` isn't a static member (which isn't a thing yet, but still)
 # so it shouldn't be able to be called.
 # However, it doesn't throw the right error.
-Entity e = Entity()
+Entity e = Entity(0)
 
 # This doesn't even generate the right code.
 

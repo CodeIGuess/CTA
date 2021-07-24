@@ -6,7 +6,7 @@
 // Use this to copy extension to VSCode
 // cp -r extension/cta ~/.vscode/extensions
 
-let vNum = "1.3.999"
+let vNum = "1.4"
 
 let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
@@ -585,7 +585,7 @@ function control(ast) {
                 p.content = {
                     type: "ccf",
                     name: p.content,
-                    arguments: []
+                    arguments: p.arguments
                 }
                 c -= 1
                 console.log(p)
@@ -742,6 +742,7 @@ function generate(node, parentType="") {
                 .map(e => e.split("\n").join("\n    "))
             classes += `class ${node.name} {\n`
                 + "public:\n    "
+                + node.name + "() {} \n    "
                 + classCode.join('\n    ')
                 + "\n};\n"
             return `// class \`${node.name}\``
