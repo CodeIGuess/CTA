@@ -1,8 +1,7 @@
-# CTA
-A compiler from CTA language to C++, written in JavaScript.
+# CTA (Compiles To Anything)
+A language that's inspired by Python, Java, and C.
 
-# What does it stand for?
-Compiles To Anything
+This repo is a compiler from CTA to C++
 
 # Why?
 I wanted to make a language that has some features built-in

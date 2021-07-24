@@ -6,18 +6,25 @@
 // Use this to copy extension to VSCode
 // cp -r extension/cta ~/.vscode/extensions
 
+// Version number for the -v argument.
 let vNum = "1.4"
 
+// Different variable types
+// `def` is the void type, which can't be used in a variable
+// `cls` is the class type
 let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
 
+// Keywords are things that can't be used as variables, but are just normal language things
 let keyWords = ["return", "break", "continue", "class", "this"]
 
+// Variables with predefined values
 let predefinedVals = {
     "true": { type: 'num', content: '1'},
     "false": { type: 'num', content: '0'}
 }
 
+// Converts CTA types to user-readable format.
 let fullTokenNames = {
     "num": "number",
     "opr": "operation",
@@ -30,6 +37,7 @@ let fullTokenNames = {
     "def": "function"
 }
 
+// Converts CTA types to C types
 let lTypesToCTypes = {
     "int": "int",
     "str": "string",
@@ -40,6 +48,7 @@ let lTypesToCTypes = {
     "ccf": ""
 }
 
+// No idea (yet)?
 let stats = {
     "print": "print",
     "input": "input"
@@ -60,6 +69,7 @@ let defaultContent = {
     "var": { type: "???" }
 }
 
+// Every operator in CTA is compiled to a function. These are the function names.
 let operationFunctions = {
     "+":  "sum",
     "-":  "sub",
@@ -75,6 +85,7 @@ let operationFunctions = {
     "=>": "meq"
 }
 
+// The start of any compiled C file.
 let genCodeLib = 
 `#include <iostream>
 #include <string>
@@ -87,35 +98,47 @@ let genCodeLib =
 using namespace std;
 `
 
+// This is where different classes, functions, and variables will be defined outside of `int main()`
 let classes = ""
 let functions = ""
 let variableCode = ""
 
+// The start of the main function
 let genCodeStart = "\nint main() {\n"
 
+// The end of the main function.
 let genCodeEnd = `
     std::cout << '\\n';
     return 0;
 }\n`
 
+// Just like the `keyWords` thing, but CTA has some custom behavior for the inputs of these.
 let controlFlow = ["if", "while", "for", "scan"]
 
+// Things that can't be used as variable names.
 let noVarNames = [...varTypes, ...controlFlow, ...Object.keys(stats), ...keyWords]
 
+// These hold values for variable checking.
+// Eventually, these should *never* be used, but it's a good enough workaround for now.
 let lastVariableType = ""
 let checkedVariableType = ""
 let fullAst
 let fullProgram = ""
 
+// Check if no arguments have been given, and print the usage of the compiler.
 if (process.argv.length == 2) {
-    printUsage()
+    console.error("usage: compiler [file name]")
+    process.exit(0)
 }
 
+// Print the compiler version
 if (process.argv.includes("-v")) {
     console.log("Version:", vNum)
     process.exit(0)
 }
 
+// Import everything for reading files, calling g++, etc.
+// This is done after the main code because it makes things faster if the user doesn't compile something.
 const fs = require("fs")
 const util = require("util")
 const { exec } = require("child_process")
@@ -133,11 +156,8 @@ fs.readFile(process.argv[2], "utf8", (err, data) => {
 
 String.prototype.any = function(c) { return this.includes(c) }
 
-function printUsage() {
-    console.error("usage: compiler [file name]")
-    process.exit(0)
-}
-
+// This is called when a compiler error is thrown.
+// It's the sole reason why `"use strict"` can't be used while debugging >:(
 function error(message, node) {
     console.log(`\x1b[31mERROR at ${arguments.callee.caller.name}: ${message}`)
     if (node != undefined) {
@@ -149,15 +169,19 @@ function error(message, node) {
     process.exit(1)
 }
 
+// This is called when any unhandled exception happens.
+// During normal operation, this sould never be called, but it's useful for debugging.
 process.on('uncaughtException', (err) => {
     console.error(`\x1b[31mThere was an uncaught error!\n `, err)
     process.exit(1)
 })
 
+// Used to warn about something which isn't a fatal error.
 function warn(message) {
     console.log(`\x1b[33m${message}\x1b[0m`)
 }
 
+// Saves the compiled code to a file
 function save(code, name) {
     fs.writeFile(name + ".cpp", code, "utf8", function fileWrite(){
         exec(`g++ -std=c++11 ${name}.cpp ${process.argv.splice(3).join(" ")}`, function compile(err) { // -stdlib=libc++
@@ -168,6 +192,7 @@ function save(code, name) {
     })
 }
 
+// Compiles a program
 function compile(program, dotfnsfile) {
     fullProgram = program
     let tokens   = tokenize(program)
@@ -179,8 +204,7 @@ function compile(program, dotfnsfile) {
     adjacentTokens(ast)
     console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
-    fullAst = ast;
-    //getVarType(ast, ".content.0.arguments.0.0.arguments.0")
+    fullAst = ast
     let code     = generate(ast)
     code      = indent(code, 1)
     classes = indent(classes, 0)
@@ -191,18 +215,21 @@ function compile(program, dotfnsfile) {
     return code.replace(/\n\n\n/g, "\n\n")
 }
 
+// Turns a program into a list of tokens
+// NOTE: this can 100% be shortened. It's slow and inefficient.
 function tokenize(program) {
-    let tokens = []
-    let currentChar = 0
-    let lineNum = 0
-    let lineChar = 0
+    let tokens      = [] // Stores all the tokens
+    let currentChar = 0  // Stores the current character index in the whole program
+    let lineNum     = 0  // Stores the current line number
+    let lineChar    = 0  // Stores the character index in the current line
+    // Loops through the entire program once
     while (currentChar < program.length) {
         let c = program[currentChar]
         if (c == '\n') {
             lineNum++
             lineChar = 0
         } else if (c == " ") {
-
+            // Do nothing, spaces don't matter :)
         } else if (c == ',') {
             tokens.push({
                 type: "sep",
@@ -236,14 +263,9 @@ function tokenize(program) {
                 posInfo: [lineNum + 1, lineNum + 1, lineChar, lineChar]
             })
         } else if ("()[]{}".any(c)) {
-            let types = {
-                '(': "opar",
-                ')': "cpar",
-                '[': "oarr",
-                ']': "carr",
-                '{': "oblk",
-                '}': "cblk"
-            }
+            let types = { '(': "opar", ')': "cpar",
+                          '[': "oarr", ']': "carr",
+                          '{': "oblk", '}': "cblk" }
             tokens.push({
                 type: types[c],
                 content: c,
@@ -333,12 +355,16 @@ function tokenize(program) {
     return tokens
 }
 
+// Turns the 1d stream of tokens into an AST (abstract syntax tree)
 function parse(tokens) {
+    // The start of the AST, the Program node
     let ast = {
         type: "Program",
         content: []
     }
     let c = 0
+    
+    // This is a recursive function
     function walk(idx) {
         let token = tokens[c]
         if (["num", "str", "nam", "opr", ...formattedVarTypes].includes(token.type)) {
@@ -401,12 +427,18 @@ function parse(tokens) {
         }
         error(`Unknown token: ${token.type} \`${token.content}\``, token)
     }
+
+    // Call walk recursively on all the tokens in the program
     while (c < tokens.length) {
         ast.content.push(walk(ast.content.length))
     }
     return ast
 }
 
+// This modifies the AST and does three things:
+//  - Turns a `name` token next to a `parentheses` token into a `call`
+//  - Pushes class names into the `varTypes` array to be classified later
+//  - Looks through parentheses, arrays, and blocks recursively
 function modify(ast) {
     let modified = ast.content
     let c = 0
@@ -446,6 +478,8 @@ function modify(ast) {
     return ast
 }
 
+// Similarly to the `modify` step, this also modifies the ast.
+// 
 function operations(ast) {
     let modified = ast.content
     let c = 0
@@ -642,7 +676,7 @@ function control(ast) {
 
 function adjacentTokens(ast) {
     let check = ast.content
-    let c = 0;
+    let c = 0
     while (c < check.length) {
         let p = check[c++]
         if (["paren", "arr"].includes(p.type)) {
