@@ -51,3 +51,20 @@ class _DotFns_ {
 
         // Extras
 };
+
+/*
+
+This is a really bad workaround.
+
+It makes custom classes (you know, normal `class` classes
+that normal people use in object-oriented programming?)
+basically impossible to implement.
+
+The only reason this exists in the first place is because
+it's easier to sideload type-checking to G++ instead of
+doing it myself in the compiler.
+
+For classes to work properly I need to get rid of this
+file and get real, compile-time, CTA type-checking working.
+
+*/
