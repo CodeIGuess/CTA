@@ -1,9 +1,9 @@
-// Can't do `use-strict` because error-handling uses `caller`.
+// Can't do `use-strict` because error-handling uses `arguments.callee.caller.name`.
 
-// Idk why this is saved here
+// No idea why this is saved here. It's just the path to the glfw library for C++.
 // /opt/homebrew/Cellar/glfw/3.3.4
 
-// Use this to copy extension to VSCode
+// Use this to copy extension to VSCode (linux/mac only)
 // cp -r extension/cta ~/.vscode/extensions
 
 // Version number for the -v argument.
@@ -479,7 +479,8 @@ function modify(ast) {
 }
 
 // Similarly to the `modify` step, this also modifies the ast.
-// 
+// This time, it takes the arguments on either side of
+// an operator and groups them into a single node.
 function operations(ast) {
     let modified = ast.content
     let c = 0
@@ -532,6 +533,9 @@ function operations(ast) {
     return ast
 }
 
+// Again, similar to the `modify` step
+// This turns a `name` next to an `equals` sign into a variable declaration.
+// It also deals with commas? (why does it do that??)
 function variables(ast) {
     let declaredVars = ast.content
     let c = 0
@@ -603,6 +607,9 @@ function variables(ast) {
     return ast
 }
 
+// ... `modify` ...
+// This uses the `controlFlow` array and groups all of the matching nodes.
+// It also deals with classes on a really basic level.
 function control(ast) {
     let modified = ast.content
     let c = 0
@@ -674,6 +681,10 @@ function control(ast) {
     return ast
 }
 
+// This makes sure you can't write `"hello" "world"` without
+// a separator, an operator, or some other token in-between.
+// It throws an error for adjacent nodes (not tokens) that
+// shouldn't be adjacent to one another.
 function adjacentTokens(ast) {
     let check = ast.content
     let c = 0
@@ -725,6 +736,7 @@ function adjacentTokens(ast) {
     return ast
 }
 
+// This gives every node a `path` property, which is used for variable type checking.
 function pathGen(ast, path="") {
     for (let b in ast) {
         if (typeof ast[b] != "string") {
@@ -735,6 +747,10 @@ function pathGen(ast, path="") {
     return ast
 }
 
+// The most important function!
+// This generates the C++ code using the provided AST.
+// If a new language needs to be implemented, this is
+// what's most likely to be changed and/or completely reworked.
 function generate(node, parentType="") {
     let code = ""
 
@@ -903,17 +919,20 @@ function generate(node, parentType="") {
     return code
 }
 
+// Checks variable names to see if they're valid.
 function checkVarName(name, t="variable", node) {
     if (noVarNames.includes(name)) {
         error(`\`${name}\` can't be used as a ${t} name`, node)
     }
 }
 
+// Adds a semicolon to a line (but only if it needs it)
 function addSemicolon(s) {
     let b = s
     return (b[b.length - 1] == "}" ? s : s + ';')
 }
 
+// Indents the resulting code
 function indent(code, i) {
     code = code.split("\n")
     for (let a = 0; a < code.length; a++) {
@@ -924,6 +943,7 @@ function indent(code, i) {
     return code.join("\n")
 }
 
+// Gets the path for any AST node.
 function getPath(ast, path) {
     path = path.split(".")
     path = path.slice(1)
@@ -931,6 +951,10 @@ function getPath(ast, path) {
     return eval("ast" + path, ast)
 }
 
+// Gets a variable by name starting from a path and
+// working up the AST. If no variable is found, (which
+// happens when a variable wasn't declared, or is out
+// of scope) this function returns `undefined`.
 function getVar(ast, path, nam) {
     path = path.split(".")
     let checkedForPath = "..."
@@ -974,6 +998,7 @@ function getVar(ast, path, nam) {
     return undefined
 }
 
+// Gets a variable type (not the node!) from a path and a name.
 function getVarType(ast, path, nam) {
     if (Object.keys(predefinedVals).includes(nam)) return "pred"
     let node = getVar(ast, path, getPath(ast, path).content)
@@ -982,6 +1007,9 @@ function getVarType(ast, path, nam) {
     return node.content.type
 }
 
+// This should be the actual function used instead of getVarType,
+// but since it's not completely necessary I'm leaving it for later. 
+// It is really important if I want arrays to work well though.
 function getAnyType(val) {
-    
+    // yikes 😬
 }
