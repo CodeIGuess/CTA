@@ -6,3 +6,4 @@ test
 libs/ml
 graphics
 .DS_Store
+.vscode
