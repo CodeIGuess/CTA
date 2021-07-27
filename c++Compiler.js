@@ -56,7 +56,7 @@ let stats = {
 
 // Currently unused, but should eventually be used.
 // C++'s default content depends on the variable type, but 
-// other languages (like JavaScript or python) just default
+// other languages (like JavaScript or Python) just default
 // it to something like `null`, `undefined`, or `None`.
 // This is a big problem. This dict is staying as a reminder.
 let defaultContent = {
@@ -754,9 +754,7 @@ function pathGen(ast, path="") {
 function generate(node, parentType="") {
     let code = ""
 
-    if (Array.isArray(node)) {
-        return node.map(generate).join(" ")
-    }
+    if (Array.isArray(node)) return node.map(generate).join(" ")
 
     switch (node.type) {
         case "Program":
