@@ -9,6 +9,48 @@
 // Version number for the -v argument.
 let vNum = "1.4"
 
+` LANGUAGE THINGS `
+
+// Converts CTA types to C types
+let lTypesToCTypes = {
+    "int": "int",
+    "str": "string",
+    "flt": "float",
+    "dbl": "double",
+    "def": "void",
+    "cls": "class",
+    "ccf": "" // Class Constructor Function
+}
+
+// The start of any compiled C file.
+let genCodeLib = 
+`#include <iostream>
+#include <string>
+#include <algorithm>
+#include <cctype>
+#include <vector>
+#include <unistd.h>
+#include "./headers/utils.h"
+#include "./headers/ctasl.h"
+using namespace std;
+`
+
+// The start of the main function
+let genCodeStart = "\nint main() {\n"
+
+// The end of the main function.
+let genCodeEnd = `
+    std::cout << '\\n';
+    return 0;
+}\n`
+
+// This is where different classes, functions, and variables will be defined outside of `int main()`
+let classes = ""
+let functions = ""
+let variableCode = ""
+
+` CTA THINGS `
+
 // Different variable types
 // `def` is the void type, which can't be used in a variable
 // `cls` is the class type
@@ -37,17 +79,6 @@ let fullTokenNames = {
     "def": "function"
 }
 
-// Converts CTA types to C types
-let lTypesToCTypes = {
-    "int": "int",
-    "str": "string",
-    "flt": "float",
-    "dbl": "double",
-    "def": "void",
-    "cls": "class",
-    "ccf": ""
-}
-
 // No idea (yet)?
 let stats = {
     "print": "print",
@@ -71,46 +102,13 @@ let defaultContent = {
 
 // Every operator in CTA is compiled to a function. These are the function names.
 let operationFunctions = {
-    "+":  "sum",
-    "-":  "sub",
-    "*":  "mul",
-    "/":  "div",
-    "==": "eql",
-    "!=": "nql",
-    "<": "lss",
-    ">": "mrr",
-    "<=": "leq",
-    "=<": "leq",
-    ">=": "meq",
-    "=>": "meq"
+    "+" : "sum", "-" : "sub",
+    "*" : "mul", "/" : "div",
+    "==": "eql", "!=": "nql",
+    "<" : "lss", ">" : "mrr",
+    "<=": "leq", "=<": "leq",
+    ">=": "meq", "=>": "meq"
 }
-
-// The start of any compiled C file.
-let genCodeLib = 
-`#include <iostream>
-#include <string>
-#include <algorithm>
-#include <cctype>
-#include <vector>
-#include <unistd.h>
-#include "./headers/utils.h"
-#include "./headers/ctasl.h"
-using namespace std;
-`
-
-// This is where different classes, functions, and variables will be defined outside of `int main()`
-let classes = ""
-let functions = ""
-let variableCode = ""
-
-// The start of the main function
-let genCodeStart = "\nint main() {\n"
-
-// The end of the main function.
-let genCodeEnd = `
-    std::cout << '\\n';
-    return 0;
-}\n`
 
 // Just like the `keyWords` thing, but CTA has some custom behavior for the inputs of these.
 let controlFlow = ["if", "while", "for", "scan"]

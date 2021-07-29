@@ -4,6 +4,7 @@
 	"patterns": [
 		{ "include": "#keywords" },
 		{ "include": "#strings" },
+		{ "include": "#multiline" },
 		{ "include": "#comments" },
 		{ "include": "#numbers" },
 		{ "include": "#calls" },
@@ -24,6 +25,17 @@
 			"name": "string.quoted.double.cta",
 			"begin": "\"",
 			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.cta",
+					"match": "\\\\."
+				}
+			]
+		},
+		"multiline": {
+			"name": "string.quoted.double.cta",
+			"begin": "`",
+			"end": "`",
 			"patterns": [
 				{
 					"name": "constant.character.escape.cta",

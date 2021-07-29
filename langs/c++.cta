@@ -1,0 +1,29 @@
+[
+    {
+        "int": "int",
+        "str": "string",
+        "flt": "float",
+        "dbl": "double",
+        "def": "void",
+        "cls": "class",
+        "ccf": ""
+    },
+    `#include <iostream>
+    #include <string>
+    #include <algorithm>
+    #include <cctype>
+    #include <vector>
+    #include <unistd.h>
+    #include "./headers/utils.h"
+    #include "./headers/ctasl.h"
+    using namespace std;
+    `,
+    "\nint main() {\n",
+    `
+        std::cout << '\\n';
+        return 0;
+    }\n`,
+    "",
+    "",
+    ""
+]
