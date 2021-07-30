@@ -1,3 +1,9 @@
+#!/usr/local/bin/node
+
+// To run this use:
+//   ./mainCompiler.js test.cta -o test.cpp
+//   node mainCompiler.js test.cta -o test.cpp
+
 // Can't do `use-strict` because error-handling uses `arguments.callee.caller.name`.
 
 // No idea why this is saved here. It's just the path to the glfw library for C++.
@@ -7,49 +13,36 @@
 // cp -r extension/cta ~/.vscode/extensions
 
 // Version number for the -v argument.
-let vNum = "1.4"
+let vNum = "1.4.1"
 
-` LANGUAGE THINGS `
+// LANGUAGE THINGS
 
 // Converts CTA types to C types
-let lTypesToCTypes = {
-    "int": "int",
-    "str": "string",
-    "flt": "float",
-    "dbl": "double",
-    "def": "void",
-    "cls": "class",
-    "ccf": "" // Class Constructor Function
-}
+let ctaTypesToLangTypes = {}
 
 // The start of any compiled C file.
-let genCodeLib = 
-`#include <iostream>
-#include <string>
-#include <algorithm>
-#include <cctype>
-#include <vector>
-#include <unistd.h>
-#include "./headers/utils.h"
-#include "./headers/ctasl.h"
-using namespace std;
-`
+let genCodeLib = ""
 
 // The start of the main function
-let genCodeStart = "\nint main() {\n"
+let genCodeStart = ""
 
 // The end of the main function.
-let genCodeEnd = `
-    std::cout << '\\n';
-    return 0;
-}\n`
+let genCodeEnd = ""
+
+// The command used for compiling the final file
+let compileCommand = ""
+
+// Other config
+let conf = {}
+
+// All of these are loaded in later from the `/langs` folder
 
 // This is where different classes, functions, and variables will be defined outside of `int main()`
 let classes = ""
 let functions = ""
 let variableCode = ""
 
-` CTA THINGS `
+// CTA THINGS
 
 // Different variable types
 // `def` is the void type, which can't be used in a variable
@@ -123,39 +116,85 @@ let checkedVariableType = ""
 let fullAst
 let fullProgram = ""
 
+// DEAL WITH ARGUMENTS
+
+let inputArguments = process.argv.slice(2)
+
 // Check if no arguments have been given, and print the usage of the compiler.
-if (process.argv.length == 2) {
-    console.error("usage: compiler [file name]")
+if (inputArguments.length == 0) {
+    console.log("usage: compiler [input file name] [output file name]")
+    console.log(`Arguments:
+    --v : gets the compiler's version
+    --p : passes the output file through the target language's compiler`)
     process.exit(0)
 }
 
 // Print the compiler version
-if (process.argv.includes("-v")) {
-    console.log("Version:", vNum)
+if (inputArguments.includes("--v")) {
+    console.log("CTA Language Compiler v" + vNum)
     process.exit(0)
 }
 
-// Import everything for reading files, calling g++, etc.
-// This is done after the main code because it makes things faster if the user doesn't compile something.
-const fs = require("fs")
+// Import every library needed (read files, output pretty dictionaries, etc.)
+// This is done after the main code because it makes things faster
+// in case the execution stops prior to here (like with the `--v` flag)
+const { promises: { readFile, writeFile }} = require("fs")
 const util = require("util")
 const { exec } = require("child_process")
-fs.readFile(process.argv[2], "utf8", (err, data) => {
-    if (data == undefined) {
-        error(`File \`${process.argv[2]}\` not found.`)
-    }
-    fs.readFile("headers/dotfns.cpp", "utf8", (err, dotfnsfile) => {
-        if (data == undefined) {
-            error(`Dot functions file not found!`)
-        }
-        save(compile(data, dotfnsfile), process.argv[2])
+
+//console.log(fs.readFile("langs/c++.cta", "utf8"))
+//fs.promises.readFile("langs/cpp.cta", "utf8")
+
+let inputFileName = inputArguments[0]
+let outputFileName = inputFileName
+if (inputArguments.includes("-o")) {
+    outputFileName = inputArguments[inputArguments.indexOf("-o") + 1]
+}
+let outputFileType = outputFileName.split(".").slice(-1)[0]
+console.log(outputFileType)
+
+readFile(inputFileName, "utf8").then(data => {
+    readFile("langs/" + outputFileType + ".json", "utf8").then(lcs => {
+        lcs = JSON.parse(lcs)
+        if ("typeConversions" in lcs) ctaTypesToLangTypes = lcs.typeConversions
+        if ("fileStart"       in lcs) genCodeLib          = lcs.fileStart
+        if ("mainStart"       in lcs) genCodeStart        = lcs.mainStart
+        if ("mainEnd"         in lcs) genCodeEnd          = lcs.mainEnd
+        if ("compilerCommand" in lcs) compileCommand      = lcs.compilerCommand
+        if ("classGenPb"      in lcs) classGenPb          = lcs.classGenPb
+
+        if ("conf" in lcs) conf = lcs.conf
+
+        if (typeof genCodeLib   != "string") genCodeLib   = genCodeLib.join("\n")
+        if (typeof genCodeStart != "string") genCodeStart = genCodeStart.join("\n")
+        if (typeof genCodeEnd   != "string") genCodeEnd   = genCodeEnd.join("\n")
+
+        writeFile(outputFileName + "." + outputFileType, compile(data), "utf8").then(() => {
+            if (inputArguments.includes("--p")) {
+                compileCommand = compileCommand.replace(/\{name\}/g, outputFileName + "." + outputFileType)
+                compileCommand = compileCommand.replace(/\{nameNoExt\}/g, outputFileName.split(".").slice(0, -1).join("."))
+                exec(compileCommand, function compile(err) {
+                    if (err) {
+                        error(err)
+                    }
+                })
+            }
+        })
     })
+    // readFile("headers/dotfns.cpp", "utf8").then((dotfnsfile) => {
+    // }).catch(e => {
+    //     console.log(e)
+    //     error(`Dot functions file not found!`)
+    // })
+}).catch(e => {
+    error(e)
+    error(`File \`${inputFileName}\` not found.`)
 })
 
 String.prototype.any = function(c) { return this.includes(c) }
 
 // This is called when a compiler error is thrown.
-// It's the sole reason why `"use strict"` can't be used while debugging >:(
+// It's the sole reason why `"use strict"` can't be used >:(
 function error(message, node) {
     console.log(`\x1b[31mERROR at ${arguments.callee.caller.name}: ${message}`)
     if (node != undefined) {
@@ -179,19 +218,8 @@ function warn(message) {
     console.log(`\x1b[33m${message}\x1b[0m`)
 }
 
-// Saves the compiled code to a file
-function save(code, name) {
-    fs.writeFile(name + ".cpp", code, "utf8", function fileWrite(){
-        exec(`g++ -std=c++11 ${name}.cpp ${process.argv.splice(3).join(" ")}`, function compile(err) { // -stdlib=libc++
-            if (err) {
-                error(err)
-            }
-        })
-    })
-}
-
 // Compiles a program
-function compile(program, dotfnsfile) {
+function compile(program) {
     fullProgram = program
     let tokens   = tokenize(program)
     let ast      = parse   (tokens)
@@ -200,16 +228,21 @@ function compile(program, dotfnsfile) {
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
+    //console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast
-    let code     = generate(ast)
-    code      = indent(code, 1)
-    classes = indent(classes, 0)
+    let code     = genCodeStart + generate(ast) + genCodeEnd
+        code     = indent(code, 0)
+    
+    classes      = indent(classes, 0)
     variableCode = indent(variableCode, 0)
-    functions = indent(functions, 0)
+    functions    = indent(functions, 0)
 
-    code = genCodeLib + dotfnsfile.split("// start class")[1] + "\n" + classes + "\n" + variableCode + "\n" + functions + genCodeStart + code + genCodeEnd
+    code = genCodeLib 
+        + "\n"+ classes
+        + "\n" + variableCode +
+        "\n" + functions
+        + code
     return code.replace(/\n\n\n/g, "\n\n")
 }
 
@@ -469,7 +502,7 @@ function modify(ast) {
             varTypes.push(addVarType)
             formattedVarTypes.push(addVarType)
 
-            lTypesToCTypes[addVarType] = addVarType
+            ctaTypesToLangTypes[addVarType] = addVarType
             modified[c].isMainClassName = true
         }
     }
@@ -627,7 +660,7 @@ function control(ast) {
                     arguments: p.arguments
                 }
                 c -= 1
-                console.log(p)
+                //console.log(p)
             } else {
                 p.arguments = p.arguments.map(e => control({content: e}).content)
             }
@@ -645,7 +678,7 @@ function control(ast) {
                 p.name = p.content.name
                 p.type = "class"
                 p.content = p.content.content
-                // console.log(p)
+                //console.log(p)
             } else if (p.content.content) {
                 p.content.content = p.content.content.map(e => control({content: e}).content)
             }
@@ -659,7 +692,7 @@ function control(ast) {
             }
             modified.splice(c, 1)
         } else if (p.type == "function") {
-            console.log(p)
+            //console.log(p)
             let type = modified[c].type
             if (type == "block") {
                 control(modified[c])
@@ -769,12 +802,12 @@ function generate(node, parentType="") {
                 + node.arguments.map(generate).join(", ")
                 + ")"
         case "function":
-            let args = node.content.arguments.map(generate).join(", ")
+            let args = node.content.arguments.map(generate, "function").join(", ")
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
             if (!["def", "ccf"].includes(type))
                 code[code.length - 1] = `return ${code[code.length - 1]}`
-            let finalFuncCode = `${lTypesToCTypes[type] + (lTypesToCTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) {\n`
+            let finalFuncCode = `${ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) {\n`
                 + code.join('\n')
                 + "\n}\n"
             if (parentType == "class") {
@@ -785,11 +818,11 @@ function generate(node, parentType="") {
             }
         case "class":
             let classCode = node.content.map(e => generate(e, "class")).map(addSemicolon)
-                .map(e => e.split("\n").join("\n    "))
+                .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
             classes += `class ${node.name} {\n`
-                + "public:\n    "
-                + node.name + "() {} \n    "
-                + classCode.join('\n    ')
+                + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
+                + node.name + "() {} \n"  + conf.classGenPb[1]
+                + classCode.join('\n' + conf.classGenPb[1])
                 + "\n};\n"
             return `// class \`${node.name}\``
         case "ctrl":
@@ -865,7 +898,7 @@ function generate(node, parentType="") {
             if (lastVariableType == "int") {
                 castType = "(int)"
             }
-            return `Array<${lTypesToCTypes[lastVariableType]}>(vector<${lTypesToCTypes[lastVariableType]}>{` + node.content.map(e => castType + generate(e)).join(", ") + "})"
+            return `Array<${ctaTypesToLangTypes[lastVariableType]}>(vector<${ctaTypesToLangTypes[lastVariableType]}>{` + node.content.map(e => castType + generate(e)).join(", ") + "})"
         case "paren":
             return `(${node.content.map(generate).join(" ")})`
         case "nam":
@@ -878,7 +911,10 @@ function generate(node, parentType="") {
             return node.content
         case "declare":
             lastVariableType = node.content.type.replace('Type', '')
-            let varType = lTypesToCTypes[lastVariableType]
+            let varType = ctaTypesToLangTypes[lastVariableType]
+            if (conf.useTypeInFunction && parentType == "function") {
+                varType = ""
+            }
             if (node.array) {
                 varType = `Array<${varType}>`
             }

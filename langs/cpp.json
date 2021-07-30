@@ -1,0 +1,34 @@
+{
+    "typeConversions": {
+        "int": "int",
+        "str": "string",
+        "flt": "float",
+        "dbl": "double",
+        "def": "void",
+        "cls": "class",
+        "ccf": ""
+    },
+    "fileStart": [
+        "#include <iostream>",
+        "#include <string>",
+        "#include <algorithm>",
+        "#include <cctype>",
+        "#include <vector>",
+        "#include <unistd.h>",
+        "#include \"../headers/utils.h\"",
+        "#include \"../headers/ctasl.h\"",
+        "using namespace std;\n"
+    ],
+    "mainStart": "\nint main() {\n",
+    "mainEnd": [
+        "    ",
+        "    std::cout << '\\n';",
+        "    return 0;",
+        "}\n"
+    ],
+    "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
+    "classGenPb": ["public:", "    "],
+    "conf": {
+        "useTypeInFunction": false
+    }
+}

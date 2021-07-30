@@ -1,0 +1,19 @@
+{
+    "typeConversions": {
+        "int": "var",
+        "str": "var",
+        "flt": "var",
+        "dbl": "var",
+        "def": "var",
+        "cls": "var",
+        "ccf": ""
+    },
+    "fileStart": "",
+    "mainStart": "",
+    "mainEnd": "\n",
+    "compilerCommand": "",
+    "conf": {
+        "classGenPb": ["", ""],
+        "useTypeInFunction": false
+    }
+}
