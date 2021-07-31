@@ -1,0 +1,30 @@
+{
+    "typeConversions": {
+        "int": "int",
+        "str": "str",
+        "flt": "flt",
+        "dbl": "dbl",
+        "def": "def",
+        "cls": "cls",
+        "ccf": ""
+    },
+    "fileStart": "",
+    "mainStart": "",
+    "mainEnd": "",
+    "compilerCommand": "",
+    "classGenPb": ["", ""],
+    "conf": {
+
+        "commentType": "#",
+        "stringCall": "",
+
+        "classGenPb": ["", ""],
+        "useTypeInFunction": true,
+        "funcType": [false, ""],
+
+        "stats": {
+            "print": "print",
+            "input": "input"
+        }
+    }
+}

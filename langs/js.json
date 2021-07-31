@@ -1,19 +1,40 @@
 {
     "typeConversions": {
-        "int": "var",
-        "str": "var",
-        "flt": "var",
-        "dbl": "var",
-        "def": "var",
-        "cls": "var",
-        "ccf": ""
+        "int": "let",
+        "str": "let",
+        "flt": "let",
+        "dbl": "let",
+        "def": "let",
+        "cls": "let",
+        "ccf": "",
+        "function": "function"
     },
-    "fileStart": "",
+    "fileStart": [
+        "let _innerConsoleLog = ''",
+        "function print(a) {",
+        "    a = a.toString().split('\\n')",
+        "    a[0] = _innerConsoleLog + a[0]",
+        "    while (a.length > 1) console.log(a.shift())",
+        "    _innerConsoleLog = a[0]",
+        "}"
+    ],
     "mainStart": "",
-    "mainEnd": "\n",
+    "mainEnd": "\nconsole.log(_innerConsoleLog);\n",
     "compilerCommand": "",
     "conf": {
+
+        "commentType": "//",
+        "stringCall": "",
+        
         "classGenPb": ["", ""],
-        "useTypeInFunction": false
+        "useTypeInFunction": false,
+        "funcType": [true, "function"],
+
+        "stats": {
+            "print": "print",
+            "input": "prompt"
+        }
+
+
     }
 }

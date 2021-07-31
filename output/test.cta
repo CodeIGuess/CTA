@@ -1,0 +1,7 @@
+
+
+def a(int num) {
+    print(string("The number is:")); print(num);
+}
+# function `a`;
+a(10);

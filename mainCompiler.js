@@ -72,11 +72,8 @@ let fullTokenNames = {
     "def": "function"
 }
 
-// No idea (yet)?
-let stats = {
-    "print": "print",
-    "input": "input"
-}
+// Stores the names of functions from CTA to the target language
+let stats = {}
 
 // Currently unused, but should eventually be used.
 // C++'s default content depends on the variable type, but 
@@ -169,7 +166,9 @@ readFile(inputFileName, "utf8").then(data => {
         if (typeof genCodeStart != "string") genCodeStart = genCodeStart.join("\n")
         if (typeof genCodeEnd   != "string") genCodeEnd   = genCodeEnd.join("\n")
 
-        writeFile(outputFileName + "." + outputFileType, compile(data), "utf8").then(() => {
+        stats = conf.stats
+
+        writeFile(outputFileName, compile(data), "utf8").then(() => {
             if (inputArguments.includes("--p")) {
                 compileCommand = compileCommand.replace(/\{name\}/g, outputFileName + "." + outputFileType)
                 compileCommand = compileCommand.replace(/\{nameNoExt\}/g, outputFileName.split(".").slice(0, -1).join("."))
@@ -228,7 +227,7 @@ function compile(program) {
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
-    //console.log("\n" + util.inspect(ast, false, null, true))
+    // console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast
     let code     = genCodeStart + generate(ast) + genCodeEnd
@@ -785,7 +784,7 @@ function pathGen(ast, path="") {
 function generate(node, parentType="") {
     let code = ""
 
-    if (Array.isArray(node)) return node.map(generate).join(" ")
+    if (Array.isArray(node)) return node.map((e) => generate(e, parentType)).join(" ")
 
     switch (node.type) {
         case "Program":
@@ -794,19 +793,30 @@ function generate(node, parentType="") {
         case "block":
             return "{\n" + node.content.map(generate).map(addSemicolon).join("\n") + "\n}"
         case "call":
-            if (node.content == stats["print"] && node.arguments.length > 1) {
-                let ret = node.arguments.map(e => `${stats["print"]}(${generate(e)})`)
-                return ret.join(`; `)
+            let callName = node.content
+            if (callName in stats) callName = stats[callName]
+            if (node.content == "print" && node.arguments.length > 1) {
+                let ret = node.arguments.map(e => `${callName}(${generate(e)})`)
+                return `(${ret.join(` + `)})`
             }
-            return node.content + "("
+            return callName + "("
                 + node.arguments.map(generate).join(", ")
                 + ")"
         case "function":
-            let args = node.content.arguments.map(generate, "function").join(", ")
+            //console.log(node.content.arguments[0])
+            let args = node.content.arguments.map((e) => generate(e, "function")).join(", ")
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
-            if (!["def", "ccf"].includes(type))
-                code[code.length - 1] = `return ${code[code.length - 1]}`
+            if (conf.funcType[0]) {
+                type = conf.funcType[1]
+            }
+            if (!["def", "ccf"].includes(type)) {
+                if (["ctrl"].includes(node.content.content.slice(-1)[0].type)) {
+                    code.push("return;")
+                } else {
+                    code[code.length - 1] = `return ${code[code.length - 1]}`
+                }
+            }
             let finalFuncCode = `${ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) {\n`
                 + code.join('\n')
                 + "\n}\n"
@@ -814,17 +824,17 @@ function generate(node, parentType="") {
                 return finalFuncCode
             } else {
                 functions += finalFuncCode
-                return `// function \`${node.content.name}\``
+                return conf.commentType + ` function \`${node.content.name}\``
             }
         case "class":
             let classCode = node.content.map(e => generate(e, "class")).map(addSemicolon)
                 .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
             classes += `class ${node.name} {\n`
                 + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
-                + node.name + "() {} \n"  + conf.classGenPb[1]
+                + node.name + "() {} \n" + conf.classGenPb[1]
                 + classCode.join('\n' + conf.classGenPb[1])
                 + "\n};\n"
-            return `// class \`${node.name}\``
+            return conf.commentType + ` class \`${node.name}\``
         case "ctrl":
             if (node.name == "for") {
                 let args = node.arguments.map(generate)
@@ -839,7 +849,7 @@ function generate(node, parentType="") {
                         args = [
                             args[0],
                             args[1],
-                            nam + "++"
+                            nam + " += 1"
                         ]
                     } else if (args.length == 3) {
                         args = [
@@ -866,7 +876,10 @@ function generate(node, parentType="") {
         case "num":
             return node.content
         case "str":
-            return 'string("' + node.content + '")'
+            if (conf.stringCall.length == 0) {
+                return '"' + node.content + '"'
+            }
+            return conf.stringCall + '("' + node.content + '")'
         case "opr":
             if (node.name == '.') {
                 let varName = generate(node.arguments[0])
@@ -877,12 +890,12 @@ function generate(node, parentType="") {
                 let var1IsArr = checkedVariableType == "arr"
                 let var2Name = generate(node.arguments[1])
                 let var2IsArr = checkedVariableType == "arr"
-                if (operationFunctions[node.name] == undefined) error(`Unknown operation \`${node.name}\``, node)
-                if (var1IsArr || var2IsArr) {
-                    return `(${var1Name} ${node.name} ${var2Name})`
-                } else {
-                    return `_${operationFunctions[node.name]}(${var1Name}, ${var2Name})`
-                }
+                //if (operationFunctions[node.name] == undefined) error(`Unknown operation \`${node.name}\``, node)
+                //if (var1IsArr || var2IsArr) {
+                return `(${var1Name} ${node.name} ${var2Name})`
+                //} else {
+                //    return `(${var1Name}, ${var2Name})`
+                //}
             }
         case "arr": // Needs code here!
             if (!node.content.every( v => v[0].type === node.content[0][0].type)) {
@@ -912,19 +925,17 @@ function generate(node, parentType="") {
         case "declare":
             lastVariableType = node.content.type.replace('Type', '')
             let varType = ctaTypesToLangTypes[lastVariableType]
-            if (conf.useTypeInFunction && parentType == "function") {
+            if ((!conf.useTypeInFunction) && parentType == "function") {
                 varType = ""
             }
-            if (node.array) {
-                varType = `Array<${varType}>`
-            }
+            if (node.array) varType = `Array<${varType}>`
             let declaration
             let setting
             if (node.content.content == undefined) {
-                declaration = `${varType} ${node.content.name}`
+                declaration = `${varType + (varType.length == 0 ? "" : " ")}${node.content.name}`
                 setting = undefined
             } else {
-                declaration = `${varType} ${node.content.name}`
+                declaration = `${varType + (varType.length == 0 ? "" : " ")}${node.content.name}`
                 setting = generate(node.content.content)
             }
             if (parentType == "Program") {
@@ -932,7 +943,7 @@ function generate(node, parentType="") {
                 if (setting != undefined) {
                     return node.content.name + " = " + setting
                 } else {
-                    return `// variable \`${node.content.name}\``
+                    return conf.commentType + ` variable \`${node.content.name}\``
                 }
             } else {
                 if (setting != undefined) {

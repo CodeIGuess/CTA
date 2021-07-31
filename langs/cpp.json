@@ -29,6 +29,17 @@
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
     "classGenPb": ["public:", "    "],
     "conf": {
-        "useTypeInFunction": false
+
+        "commentType": "//",
+        "stringCall": "string",
+        
+        "classGenPb": ["", ""],
+        "useTypeInFunction": false,
+        "funcType": [false, ""],
+
+        "stats": {
+            "print": "print",
+            "input": "input"
+        }
     }
 }
