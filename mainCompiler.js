@@ -13,7 +13,7 @@
 // cp -r extension/cta ~/.vscode/extensions
 
 // Version number for the -v argument.
-let vNum = "1.4.1"
+let vNum = "1.4.4"
 
 // LANGUAGE THINGS
 
@@ -242,7 +242,10 @@ function compile(program) {
         + "\n" + variableCode +
         "\n" + functions
         + code
-    return code.replace(/\n\n\n/g, "\n\n")
+    while (code.match(/\n\s*\n/)) code = code.replace(/\n\s*\n/, "\n")
+    while ([" ", "\n"].includes(code[0])) code = code.substr(1)
+    while ([" ", "\n"].includes(code[code.length - 1])) code = code.slice(0, -1)
+    return code
 }
 
 // Turns a program into a list of tokens
@@ -791,7 +794,7 @@ function generate(node, parentType="") {
             return node.content.map(e => generate(e, "Program")).map(addSemicolon)
                 .join("\n")
         case "block":
-            return "{\n" + node.content.map(generate).map(addSemicolon).join("\n") + "\n}"
+            return conf.separator[0] + "\n" + node.content.map(generate).map(addSemicolon).join("\n") + "\n" + conf.separator[1]
         case "call":
             let callName = node.content
             if (callName in stats) callName = stats[callName]
@@ -807,9 +810,6 @@ function generate(node, parentType="") {
             let args = node.content.arguments.map((e) => generate(e, "function")).join(", ")
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
-            if (conf.funcType[0]) {
-                type = conf.funcType[1]
-            }
             if (!["def", "ccf"].includes(type)) {
                 if (["ctrl"].includes(node.content.content.slice(-1)[0].type)) {
                     code.push("return;")
@@ -817,23 +817,28 @@ function generate(node, parentType="") {
                     code[code.length - 1] = `return ${code[code.length - 1]}`
                 }
             }
-            let finalFuncCode = `${ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) {\n`
-                + code.join('\n')
-                + "\n}\n"
+            if (type == "ccf") {
+                if (conf.constructor != "{name}") node.content.name = conf.constructor
+            }
+            if (conf.funcType[0] && ctaTypesToLangTypes[type].length != 0) type = conf.funcType[1]
+            if (conf.constructorFuncName) type = conf.funcType[1]
+            let finalFuncCode = `${ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) ${conf.separator[0]}\n`
+            finalFuncCode += code.join('\n')
+            finalFuncCode += `\n${conf.separator[1]}\n`
             if (parentType == "class") {
                 return finalFuncCode
             } else {
                 functions += finalFuncCode
-                return conf.commentType + ` function \`${node.content.name}\``
+                return `${conf.commentType} function \`${node.content.name}\``
             }
         case "class":
             let classCode = node.content.map(e => generate(e, "class")).map(addSemicolon)
                 .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
-            classes += `class ${node.name} {\n`
+            classes += `class ${node.name} ${conf.separator[0]}\n`
                 + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
-                + node.name + "() {} \n" + conf.classGenPb[1]
+                //+ node.name + "() {} \n" + conf.classGenPb[1]
                 + classCode.join('\n' + conf.classGenPb[1])
-                + "\n};\n"
+                + `\n${conf.separator[1]};\n`
             return conf.commentType + ` class \`${node.name}\``
         case "ctrl":
             if (node.name == "for") {

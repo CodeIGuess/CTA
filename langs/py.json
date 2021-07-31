@@ -1,0 +1,36 @@
+{
+    "typeConversions": {
+        "int": "",
+        "str": "",
+        "flt": "",
+        "dbl": "",
+        "def": "def",
+        "cls": "class",
+        "ccf": ""
+    },
+    "fileStart": [],
+    "mainStart": "",
+    "mainEnd": "",
+    "compilerCommand": "",
+    "conf": {
+
+        "separator": [": #{", "#}"],
+
+        "constructor": "__init__",
+        "constructorFuncName": true,
+
+        "commentType": "#",
+        "stringCall": "",
+        
+        "classGenPb": ["", ""],
+        "useTypeInFunction": false,
+        "funcType": [true, "def"],
+
+        "stats": {
+            "print": "print",
+            "input": "prompt"
+        }
+
+
+    }
+}

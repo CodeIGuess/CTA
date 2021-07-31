@@ -1,16 +1,16 @@
 
-# cls Entity {
-#     Entity(int a) {
-#         print("class input: ", a)
-#     }
-#     # Remember to add different class constructors!
+cls Entity {
+    Entity(int a) {
+        print("class input: ", a)
+    }
+    # Remember to add different class constructors!
 
-#     #int x = 5
-#     #int y = 3
-#     # int sum() {
-#     #     x + y
-#     # }
-# }
+    #int x = 5
+    #int y = 3
+    # int sum() {
+    #     x + y
+    # }
+}
 
 # def a(int num) {
 #     print("The number is:", num)
@@ -26,19 +26,19 @@
 
 # Remember to check for JSON.stringify in errors!
 
-def fib(int number) {
-    flt n1 = 0
-    flt n2 = 1
-    flt nextTerm
-    print("\nFibonacci: \n")
-    for (int a = 0, a < number) {
-        print(n1, " ")
-        nextTerm = n1 + n2
-        n1 = n2
-        n2 = nextTerm
-    }
-}
-fib(10)
+# def fib(int number) {
+#     flt n1 = 0
+#     flt n2 = 1
+#     flt nextTerm
+#     print("\nFibonacci: \n")
+#     for (int a = 0, a < number) {
+#         print(n1, " ")
+#         nextTerm = n1 + n2
+#         n1 = n2
+#         n2 = nextTerm
+#     }
+# }
+# fib(10)
 
 # Errors to check for:
 #print(0 0)
