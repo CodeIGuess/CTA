@@ -172,7 +172,7 @@ readFile(inputFileName, "utf8").then(data => {
             if (inputArguments.includes("--p")) {
                 compileCommand = compileCommand.replace(/\{name\}/g, outputFileName + "." + outputFileType)
                 compileCommand = compileCommand.replace(/\{nameNoExt\}/g, outputFileName.split(".").slice(0, -1).join("."))
-                exec(compileCommand, function compile(err) {
+                exec(compileCommand, function compileCode(err) {
                     if (err) {
                         error(err)
                     }
@@ -198,7 +198,10 @@ function error(message, node) {
     console.log(`\x1b[31mERROR at ${arguments.callee.caller.name}: ${message}`)
     if (node != undefined) {
         console.log("  Line " + node.posInfo[0] + ":", fullProgram.split("\n")[node.posInfo[0] - 1])
-        console.log("        ", " ".repeat(node.posInfo[2]) + "^".repeat((node.posInfo[3] - node.posInfo[2]) + 1))
+        console.log(
+            "        ", 
+            " ".repeat(node.posInfo[2])
+            + "^".repeat((node.posInfo[3] - node.posInfo[2]) + 1))
     } else {
         console.log("  ( No node provided!!! )")
     }
@@ -242,6 +245,7 @@ function compile(program) {
         + "\n" + variableCode +
         "\n" + functions
         + code
+    code = code.replace(/\n\s*;\n/g, "\n\n")
     while (code.match(/\n\s*\n/)) code = code.replace(/\n\s*\n/, "\n")
     while ([" ", "\n"].includes(code[0])) code = code.substr(1)
     while ([" ", "\n"].includes(code[code.length - 1])) code = code.slice(0, -1)
@@ -380,7 +384,9 @@ function tokenize(program) {
                 })
             }
         } else {
-            error(`Character not recognized: \`${c}\``, {posInfo: [lineNum + 1, lineNum + 1, lineChar, lineChar]})
+            error(`Character not recognized: \`${c}\``, {
+                posInfo: [lineNum + 1, lineNum + 1, lineChar, lineChar]
+            })
         }
         currentChar++
         lineChar++
@@ -400,12 +406,14 @@ function parse(tokens) {
     // This is a recursive function
     function walk(idx) {
         let token = tokens[c]
-        if (["num", "str", "nam", "opr", ...formattedVarTypes].includes(token.type)) {
+        if (["num", "str", "nam", "opr", 
+            ...formattedVarTypes].includes(token.type)) {
             c++
             return token
         }
         if (token.type == "oarr") {
-            let node = {type: "arr", content: [], posInfo: [token.posInfo[0], -1, token.posInfo[2], -1]}
+            let node = {type: "arr", content: [], posInfo: [
+                token.posInfo[0], -1, token.posInfo[2], -1]}
             c++
             token = walk()
             while (token.type != "carr") {
@@ -498,7 +506,8 @@ function modify(ast) {
             }
         } else if (p.type == "clsType") {
             if (c + 1 > modified.length) error(`Expected something after \`cls\``, p)
-            if (c + 2 > modified.length) error(`Expected something after \`${modified[c].content}\``, modified[c])
+            if (c + 2 > modified.length) error(
+                `Expected something after \`${modified[c].content}\``, modified[c])
             let addVarType = modified[c].content
 
             varTypes.push(addVarType)
@@ -535,18 +544,25 @@ function operations(ast) {
             }
         } else if (p.type == "opr" && ["++", "--"].includes(p.content)) {
             if (c == 1) error(`Expected something before \`${p.content}\``, p)
-            if (modified[c - 2].type != "nam") error(`Unexpected ${fullTokenNames[modified[c - 2].type]} before \`${p.content}\``, modified[c - 2])
+            if (modified[c - 2].type != "nam")
+                error(`Unexpected ${fullTokenNames[modified[c - 2].type]
+                    } before \`${p.content}\``, 
+                modified[c - 2])
             modified[c - 1].content = p.content[0] + "="
             modified.splice(c, 0, {type: "num", content: '1'})
         } else if (p.type == "opr") {
             if (p.name != undefined) continue
             if (c == 1) error(`Expected something before \`${p.content}\``, p)
-            if (c == modified.length) error(`Expected something after \`${p.content}\``, p)
+            if (c == modified.length)
+                error(`Expected something after \`${p.content}\``, p)
             if (["++", "--", "+=", "-=", "*=", "/="].includes(p.content)) continue
-            if (modified[c - 2].type.includes("Type")) error(`\`${modified[c - 2].content}\` isn't a value`, modified[c - 2])
-            if (modified[c].type.includes("Type")) error(`\`${modified[c].content}\` isn't a value`, modified[c])
+            if (modified[c - 2].type.includes("Type"))
+                error(`\`${modified[c - 2].content }\` isn't a value`, modified[c - 2])
+            if (modified[c].type.includes("Type")) error(`\`${modified[c].content
+                }\` isn't a value`, modified[c])
             if (["paren", "arr"].includes(modified[c].type)) {
-                modified[c].content = modified[c].content.map(e => operations({content: e}).content)
+                modified[c].content = modified[c].content.map(e =>
+                    operations({content: e}).content)
             } else {
                 modified[c] = operations(modified[c])
             }
@@ -559,7 +575,9 @@ function operations(ast) {
                 ]
             })
             modified.splice(--c, 3)
-        } else if (p.type == "nam" && varTypes.includes(p.content) && !p.isMainClassName) {
+        } else if (p.type == "nam"
+            && varTypes.includes(p.content)
+            && !p.isMainClassName) {
             p.type = p.content
         }
     }
@@ -575,7 +593,8 @@ function variables(ast) {
     while (c < declaredVars.length) {
         let p = declaredVars[c++]
         if (["paren", "arr"].includes(p.type)) {
-            p.content = p.content.map(e => variables({content: e, type: p.type}).content)
+            p.content = p.content.map(e => variables({
+                content: e, type: p.type}).content)
         } else if (p.type == "block") {
             p = variables(p)
         } else if (p.type == "call") {
@@ -583,13 +602,16 @@ function variables(ast) {
         } else if (p.type == "ctrl") {
             p.arguments = p.arguments.map(e => variables({content: e}).content)
         } else if (formattedVarTypes.includes(p.type)) {
-            if (["paren", "arr"].includes(ast.type)) error(`Declaration inside of a container`)
-            if (c >= declaredVars.length) error(`Expected something after \`${p.type.replace("Type","")}\``, p)
+            if (["paren", "arr"].includes(ast.type))
+                error(`Declaration inside of a container`)
+            if (c >= declaredVars.length)
+                error(`Expected something after \`${p.type.replace("Type","")}\``, p)
             if (declaredVars[c].type == "call") {
                 p.content = {
                     type: p.type,
                     name: declaredVars[c].content,
-                    arguments: declaredVars[c].arguments.map(e => variables({content: e}).content)
+                    arguments: declaredVars[c].arguments.map(e => 
+                        variables({content: e}).content)
                 }
                 checkVarName(p.content.name, "function", declaredVars[c])
                 p.type = "function"
@@ -599,10 +621,12 @@ function variables(ast) {
                 p.array = true
                 declaredVars.splice(c, 1)
             } else if (declaredVars[c].type != "nam") {
-                error(`Expected variable name after \`${p.content}\`, got \`${declaredVars[c].type}\``)
+                error(`Expected variable name after \`${p.content}\`, got \`${
+                    declaredVars[c].type}\``)
             }
             // Declaration
-            if (c >= declaredVars.length) error(`Expected variable name after \`${p.content}\``)
+            if (c >= declaredVars.length) error(`Expected variable name after \`${
+                p.content}\``)
             if (c > declaredVars.length - 2 || declaredVars[c + 1].content != '=') {
                 p.content = {
                     type: p.type,
@@ -623,10 +647,15 @@ function variables(ast) {
             checkVarName(p.content.name, "variable")
         } else if (p.type == "nam") {
             if (c >= declaredVars.length) continue
-            if (declaredVars[c].type == "sep") error(`Misplaced separator, the comma doesn't do anything here.`)
-            if (declaredVars[c].type.includes("Type")) error(`No idea what this means. Try swapping \`${p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
-            if (declaredVars[c].type != "opr") error(`No idea what this means.`, declaredVars[c])
-            if (c >= declaredVars.length - 1) error(`Expected something after \`${declaredVars[c].content}\``)
+            if (declaredVars[c].type == "sep")
+                error(`Misplaced separator, the comma doesn't do anything here.`)
+            if (declaredVars[c].type.includes("Type"))
+                error(`No idea what this means. Try swapping \`${
+                p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
+            if (declaredVars[c].type != "opr")
+                error(`No idea what this means.`, declaredVars[c])
+            if (c >= declaredVars.length - 1)
+                error(`Expected something after \`${declaredVars[c].content}\``)
             checkVarName(p.content, "variable", p)
             p.content = {
                 type: declaredVars[c].content,
@@ -675,14 +704,17 @@ function control(ast) {
                     p.content.content = modified[c].content
                     modified.splice(c, 1)
                 } else {
-                    error(`Found ${fullTokenNames[type]} after class declaration.`, modified[c])
+                    error(`Found ${fullTokenNames[type]} after class declaration.`, 
+                        modified[c])
                 }
                 p.name = p.content.name
                 p.type = "class"
                 p.content = p.content.content
                 //console.log(p)
             } else if (p.content.content) {
-                p.content.content = p.content.content.map(e => control({content: e}).content)
+                p.content.content = p.content.content.map(e => control({
+                    content: e
+                        }).content)
             }
         } else if (p.type == "ctrl") {
             p.arguments = p.arguments.map(e => control({content: e}).content)
@@ -724,7 +756,8 @@ function adjacentTokens(ast) {
     while (c < check.length) {
         let p = check[c++]
         if (["paren", "arr"].includes(p.type)) {
-            if (p.type == "paren" && p.content.length > 1) error(`Misplaced separator, the comma doesn't do anything here`)
+            if (p.type == "paren" && p.content.length > 1) error(
+                `Misplaced separator, the comma doesn't do anything here`)
             p.content.map(e => adjacentTokens({content: e}).content)
         } else if (p.type == "block") {
             adjacentTokens(p)
@@ -736,7 +769,9 @@ function adjacentTokens(ast) {
         } else if (p.type == "modify") {
             adjacentTokens({content: p.content.content})
         } else if (p.type == "ctrl") {
-            p.arguments.map(e => adjacentTokens({type: "paren", content: e}).content)
+            p.arguments.map(e => adjacentTokens({
+                    type: "paren", content: e
+                }).content)
             adjacentTokens(p)
         } else if (p.type == "opr") {
             adjacentTokens({type: "opr", content: p.arguments})
@@ -761,9 +796,12 @@ function adjacentTokens(ast) {
             if (!doErr) {
                 if (goodTypes.includes(p.type)) continue
                 if (goodTypes.includes(check[c].type)) continue
-                if (p.type == check[c].type) error(`Two ${fullTokenNames[p.type]}s can't be next to each other here.`)
+                if (p.type == check[c].type) error(`Two ${fullTokenNames[p.type]
+                    }s can't be next to each other here.`)
             }
-            error(`Found \`${fullTokenNames[p.type]}\` next to \`${fullTokenNames[check[c].type]}\`. Try moving one of them somewhere else.`)
+            error(`Found \`${fullTokenNames[p.type]}\` next to \`${
+                fullTokenNames[check[c].type]
+                }\`. Try moving one of them somewhere else.`)
         }
     }
     return ast
@@ -787,14 +825,18 @@ function pathGen(ast, path="") {
 function generate(node, parentType="") {
     let code = ""
 
-    if (Array.isArray(node)) return node.map((e) => generate(e, parentType)).join(" ")
+    if (Array.isArray(node))
+        return node.map((e) => generate(e, parentType)).join(" ")
 
     switch (node.type) {
         case "Program":
             return node.content.map(e => generate(e, "Program")).map(addSemicolon)
                 .join("\n")
         case "block":
-            return conf.separator[0] + "\n" + node.content.map(generate).map(addSemicolon).join("\n") + "\n" + conf.separator[1]
+            return conf.separator[0] + "\n" + node.content
+                .map(generate)
+                .map(addSemicolon)
+                .join("\n") + "\n" + conf.separator[1]
         case "call":
             let callName = node.content
             if (callName in stats) callName = stats[callName]
@@ -807,7 +849,8 @@ function generate(node, parentType="") {
                 + ")"
         case "function":
             //console.log(node.content.arguments[0])
-            let args = node.content.arguments.map((e) => generate(e, "function")).join(", ")
+            let args = node.content.arguments
+                .map((e) => generate(e, "function")).join(", ")
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
             if (!["def", "ccf"].includes(type)) {
@@ -818,11 +861,15 @@ function generate(node, parentType="") {
                 }
             }
             if (type == "ccf") {
-                if (conf.constructor != "{name}") node.content.name = conf.constructor
+                if (conf.constructor != "{name}")
+                    node.content.name = conf.constructor
             }
-            if (conf.funcType[0] && ctaTypesToLangTypes[type].length != 0) type = conf.funcType[1]
+            if (conf.funcType[0] && ctaTypesToLangTypes[type].length != 0)
+                type = conf.funcType[1]
             if (conf.constructorFuncName) type = conf.funcType[1]
-            let finalFuncCode = `${ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")}${node.content.name}(${args}) ${conf.separator[0]}\n`
+            let finalFuncCode = `${ctaTypesToLangTypes[type]
+                + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")
+                }${node.content.name}(${args}) ${conf.separator[0]}\n`
             finalFuncCode += code.join('\n')
             finalFuncCode += `\n${conf.separator[1]}\n`
             if (parentType == "class") {
@@ -832,7 +879,9 @@ function generate(node, parentType="") {
                 return `${conf.commentType} function \`${node.content.name}\``
             }
         case "class":
-            let classCode = node.content.map(e => generate(e, "class")).map(addSemicolon)
+            let classCode = node.content
+                .map(e => generate(e, "class"))
+                .map(addSemicolon)
                 .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
             classes += `class ${node.name} ${conf.separator[0]}\n`
                 + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
@@ -869,7 +918,8 @@ function generate(node, parentType="") {
                     + node.content.map(generate).map(addSemicolon).join("\n")
                     + "\n}"
             } else if (node.arguments.length != 1) {
-                error(`Didn't expect ${node.arguments.length} arguments for \`${node.name}\``)
+                error(`Didn't expect ${
+                    node.arguments.length} arguments for \`${node.name}\``)
             }
             if (node.content == undefined) {
                 error("For some reason the if statement didn't get a block? Idk.")
@@ -889,13 +939,14 @@ function generate(node, parentType="") {
             if (node.name == '.') {
                 let varName = generate(node.arguments[0])
                 let fnCall = generate(node.arguments[1]).split("(")
-                return `_DotFns_::${fnCall[0]}(${varName}${fnCall.slice(1).join("(").length > 1 ? ", " : ""}${fnCall.slice(1).join("(")}`
+                return `_DotFns_::${fnCall[0]}(${varName}${
+                    fnCall.slice(1).join("(").length > 1 ? ", " : ""
+                    }${fnCall.slice(1).join("(")}`
             } else {
                 let var1Name = generate(node.arguments[0])
                 let var1IsArr = checkedVariableType == "arr"
                 let var2Name = generate(node.arguments[1])
                 let var2IsArr = checkedVariableType == "arr"
-                //if (operationFunctions[node.name] == undefined) error(`Unknown operation \`${node.name}\``, node)
                 //if (var1IsArr || var2IsArr) {
                 return `(${var1Name} ${node.name} ${var2Name})`
                 //} else {
@@ -908,7 +959,8 @@ function generate(node, parentType="") {
             }
             let inferredType = node.content[0][0].type
             if (inferredType == "str" && lastVariableType != "str") {
-                error(`Can't assign variable type \`string\` to type \`${formattedVarTypes[lastVariableType]}\``)
+                error(`Can't assign variable type \`string\` to type \`${
+                    formattedVarTypes[lastVariableType]}\``)
             } else if (inferredType == "num" && lastVariableType == "str") {
                 error(`Can't assign variable type \`number\` to type \`string\``)
             }
@@ -916,13 +968,16 @@ function generate(node, parentType="") {
             if (lastVariableType == "int") {
                 castType = "(int)"
             }
-            return `Array<${ctaTypesToLangTypes[lastVariableType]}>(vector<${ctaTypesToLangTypes[lastVariableType]}>{` + node.content.map(e => castType + generate(e)).join(", ") + "})"
+            return `Array<${ctaTypesToLangTypes[lastVariableType]}>(vector<${
+                ctaTypesToLangTypes[lastVariableType]}>{` + node.content.map(
+                    e => castType + generate(e)).join(", ") + "})"
         case "paren":
             return `(${node.content.map(generate).join(" ")})`
         case "nam":
             if (![...keyWords].includes(node.content)) {
                 let varType = getVarType(fullAst, node.path, node.content)
-                if (varType == undefined) error(`Variable \`${node.content}\` not declared`)
+                if (varType == undefined)
+                    error(`Variable \`${node.content}\` not declared`)
                 if (varType == "pred") return predefinedVals[node.content].content
                 checkedVariableType = varType
             }
@@ -937,10 +992,12 @@ function generate(node, parentType="") {
             let declaration
             let setting
             if (node.content.content == undefined) {
-                declaration = `${varType + (varType.length == 0 ? "" : " ")}${node.content.name}`
+                declaration = `${varType + (varType.length == 0 ?
+                    "" : " ")}${node.content.name}`
                 setting = undefined
             } else {
-                declaration = `${varType + (varType.length == 0 ? "" : " ")}${node.content.name}`
+                declaration = `${varType + (varType.length == 0 ?
+                    "" : " ")}${node.content.name}`
                 setting = generate(node.content.content)
             }
             if (parentType == "Program") {
@@ -948,7 +1005,7 @@ function generate(node, parentType="") {
                 if (setting != undefined) {
                     return node.content.name + " = " + setting
                 } else {
-                    return conf.commentType + ` variable \`${node.content.name}\``
+                    return `${conf.commentType} variable \`${node.content.name}\``
                 }
             } else {
                 if (setting != undefined) {
@@ -958,7 +1015,8 @@ function generate(node, parentType="") {
                 }
             }
         case "modify":
-            return `${node.content.name} ${node.content.type} ${generate(node.content.content)}`
+            return `${node.content.name} ${node.content.type
+                } ${generate(node.content.content)}`
         case "sep":
             error(`Why is this comma here?`)
         default:
@@ -984,9 +1042,13 @@ function addSemicolon(s) {
 function indent(code, i) {
     code = code.split("\n")
     for (let a = 0; a < code.length; a++) {
-        if (code[a][code[a].length - 1] == ';' ? "}".includes(code[a][code[a].length - 2]) : ")]}".includes(code[a][code[a].length - 1])) i--
+        if (code[a][code[a].length - 1] == ';' ? 
+            "}".includes(code[a][code[a].length - 2]) : 
+            ")]}".includes(code[a][code[a].length - 1])) i--
         code[a] = "    ".repeat(i) + code[a]
-        if (code[a][code[a].length - 1] == ';' ? "([{".includes(code[a][code[a].length - 2]) : "([{".includes(code[a][code[a].length - 1])) i++
+        if (code[a][code[a].length - 1] == ';' ?
+            "([{".includes(code[a][code[a].length - 2]) :
+            "([{".includes(code[a][code[a].length - 1])) i++
     }
     return code.join("\n")
 }
@@ -1015,14 +1077,17 @@ function getVar(ast, path, nam) {
             isNum = !isNaN(parseFloat(last))
         } else {
             let finalPath = path.join(".") + "." + last
-            if (path[path.length - 1] == "arguments" && getPath(ast, path.join("."))[0].length != undefined) {
+            if (path[path.length - 1] == "arguments"
+                && getPath(ast, path.join("."))[0].length != undefined) {
                 finalPath = path.join(".") + "." + last + ".0"
             }
             let node = getPath(ast, finalPath)
             if (node.type == "declare" && node.content.name == nam) {
                 return node
-            } else if (((node.type == "ctrl" && ["for"].includes(node.name)) || node.type == "function") && checkedForPath != node.path) {
-                if (node.type == "function" && node.content.arguments.length == 0) {
+            } else if (((node.type == "ctrl" && ["for"].includes(node.name))
+                || node.type == "function") && checkedForPath != node.path) {
+                if (node.type == "function" 
+                    && node.content.arguments.length == 0) {
                     last--
                     continue
                 }
