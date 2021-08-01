@@ -5,20 +5,12 @@ function print(a) {
     while (a.length > 1) console.log(a.shift())
     _innerConsoleLog = a[0]
 }
-
-function fib(number) {
-    let n1 = 0;
-    let n2 = 1;
-    let nextTerm;
-    print("\nFibonacci: \n");
-    for (let a = 0; (a < number); a += 1) {
-        (print(n1) + print(" "));
-        nextTerm = (n1 + n2);
-        n1 = n2;
-        n2 = nextTerm;
+class Entity {
+    constructor(a) {
+        (print("class input: ") + print(a));
     }
-    return;
-}
-// function `fib`;
-fib(10);
+};
+Entity e;
+// class `Entity`;
+e = Entity(0);
 console.log(_innerConsoleLog);
