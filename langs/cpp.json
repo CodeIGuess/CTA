@@ -21,20 +21,22 @@
     ],
     "mainStart": "\nint main() {\n",
     "mainEnd": [
-        "    ",
-        "    std::cout << '\\n';",
-        "    return 0;",
+        "",
+        "std::cout << '\\n';",
+        "return 0;",
         "}\n"
     ],
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
     "classGenPb": ["public:", "    "],
     "conf": {
 
+        "separator": ["{", "}"],
+
         "commentType": "//",
         "stringCall": "string",
         
         "classGenPb": ["", ""],
-        "useTypeInFunction": false,
+        "useTypeInFunction": true,
         "funcType": [false, ""],
 
         "stats": {
