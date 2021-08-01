@@ -18,7 +18,7 @@ cls Entity {
 # a(10)
 
 #Entity.sum()
-# Entity e = Entity(0)
+Entity e = Entity(0)
 
 # This doesn't even generate the right code.
 
