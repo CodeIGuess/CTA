@@ -6,8 +6,7 @@
         "dbl": "let",
         "def": "let",
         "cls": "class",
-        "ccf": "",
-        "function": "function"
+        "ccf": ""
     },
     "fileStart": [
         "let _innerConsoleLog = ''",
@@ -23,6 +22,9 @@
     "compilerCommand": "",
     "conf": {
 
+        "classCodeStart": "",
+        "newClassPrefix": true,
+
         "separator": ["{", "}"],
 
         "constructor": "constructor",
@@ -33,6 +35,8 @@
         
         "classGenPb": ["", ""],
         "useTypeInFunction": false,
+        "useTypeInClass": false,
+        "useFuncTypeInClass": false,
         "funcType": [true, "function"],
 
         "stats": {

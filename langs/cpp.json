@@ -30,13 +30,19 @@
     "classGenPb": ["public:", "    "],
     "conf": {
 
+        "classCodeStart": "public:",
+        "newClassPrefix": false,
+
         "separator": ["{", "}"],
 
+        "constructor": "{name}",
         "commentType": "//",
         "stringCall": "string",
         
         "classGenPb": ["", ""],
         "useTypeInFunction": true,
+        "useTypeInClass": true,
+        "useFuncTypeInClass": true,
         "funcType": [false, ""],
 
         "stats": {
