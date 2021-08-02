@@ -8,7 +8,7 @@
 using namespace std;
 
 string print(string i       ) { cout << i; return i; }
-float  print(float i        ) { cout << i; return i; }
+string print(float i        ) { cout << i; return to_string(i); }
 template <class T>
 string print(Array<T> i        ) { string r = i.toString(); cout << r; return r; }
 
