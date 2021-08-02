@@ -5,11 +5,11 @@ cls Entity {
     }
     # Remember to add different class constructors!
 
-    #int x = 5
-    #int y = 3
-    # int sum() {
-    #     x + y
-    # }
+    int x = 5
+    int y = 3
+    int sum() {
+        x + y
+    }
 }
 
 # def a(int num) {
