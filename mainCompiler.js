@@ -106,6 +106,9 @@ let controlFlow = ["if", "while", "for", "scan"]
 // Things that can't be used as variable names.
 let noVarNames = [...varTypes, ...controlFlow, ...Object.keys(stats), ...keyWords]
 
+// Stores all the new class names
+let classNames = []
+
 // These hold values for variable checking.
 // Eventually, these should *never* be used, but it's a good enough workaround for now.
 let lastVariableType = ""
@@ -168,10 +171,14 @@ readFile(inputFileName, "utf8").then(data => {
 
         stats = conf.stats
 
+        if (conf.funcType[0]) ctaTypesToLangTypes[conf.funcType[1]] = conf.funcType[1]
+
         writeFile(outputFileName, compile(data), "utf8").then(() => {
             if (inputArguments.includes("--p")) {
-                compileCommand = compileCommand.replace(/\{name\}/g, outputFileName + "." + outputFileType)
-                compileCommand = compileCommand.replace(/\{nameNoExt\}/g, outputFileName.split(".").slice(0, -1).join("."))
+                compileCommand = compileCommand.replace(/\{name\}/g,
+                    outputFileName)
+                compileCommand = compileCommand.replace(/\{nameNoExt\}/g,
+                    outputFileName.split(".").slice(0, -1).join("."))
                 exec(compileCommand, function compileCode(err) {
                     if (err) {
                         error(err)
@@ -510,6 +517,7 @@ function modify(ast) {
                 `Expected something after \`${modified[c].content}\``, modified[c])
             let addVarType = modified[c].content
 
+            classNames.push(addVarType)
             varTypes.push(addVarType)
             formattedVarTypes.push(addVarType)
 
@@ -844,7 +852,9 @@ function generate(node, parentType="") {
                 let ret = node.arguments.map(e => `${callName}(${generate(e)})`)
                 return `(${ret.join(` + `)})`
             }
-            return callName + "("
+            let callPrefix = ""
+            if (classNames.includes(callName) && conf.newClassPrefix) callPrefix = "new "
+            return callPrefix + callName + "("
                 + node.arguments.map(generate).join(", ")
                 + ")"
         case "function":
@@ -867,11 +877,11 @@ function generate(node, parentType="") {
             if (conf.funcType[0] && ctaTypesToLangTypes[type].length != 0)
                 type = conf.funcType[1]
             if (conf.constructorFuncName) type = conf.funcType[1]
-            let finalFuncCode = `${ctaTypesToLangTypes[type]
-                + (ctaTypesToLangTypes[type].length == 0 ? "" : " ")
-                }${node.content.name}(${args}) ${conf.separator[0]}\n`
+            let finalFuncCode = `${node.content.name}(${args}) ${
+                conf.separator[0]}\n`
             finalFuncCode += code.join('\n')
             finalFuncCode += `\n${conf.separator[1]}\n`
+            if (conf.useFuncTypeInClass) finalFuncCode = ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ") + finalFuncCode
             if (parentType == "class") {
                 return finalFuncCode
             } else {
@@ -884,6 +894,7 @@ function generate(node, parentType="") {
                 .map(addSemicolon)
                 .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
             classes += `class ${node.name} ${conf.separator[0]}\n`
+                + conf.classCodeStart + "\n"
                 + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
                 //+ node.name + "() {} \n" + conf.classGenPb[1]
                 + classCode.join('\n' + conf.classGenPb[1])
@@ -985,9 +996,8 @@ function generate(node, parentType="") {
         case "declare":
             lastVariableType = node.content.type.replace('Type', '')
             let varType = ctaTypesToLangTypes[lastVariableType]
-            if ((!conf.useTypeInFunction) && parentType == "function") {
-                varType = ""
-            }
+            if ((!conf.useTypeInFunction) && parentType == "function") varType = ""
+            if ((!conf.useTypeInClass) && parentType == "class") varType = ""
             if (node.array) varType = `Array<${varType}>`
             let declaration
             let setting
