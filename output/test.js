@@ -9,8 +9,13 @@ class Entity {
     constructor(a) {
         (print("class input: ") + print(a));
     }
+    x = 5;
+    y = 3;
+    sum() {
+        return (x + y);
+    }
 };
 Entity e;
 // class `Entity`;
-e = Entity(0);
+e = new Entity(0);
 console.log(_innerConsoleLog);
