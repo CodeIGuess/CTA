@@ -9,6 +9,7 @@
 using namespace std;
 class Entity {
     public:
+    Entity() {} 
     Entity(int a) {
         (print(string("class input: ")) + print(a));
     }

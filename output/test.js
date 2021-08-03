@@ -7,7 +7,7 @@ function print(a) {
 }
 class Entity {
     constructor(a) {
-        (print("class input: ") + print(a));
+        (print("class input: ") + print(a) + print("\n"));
     }
     x = 5;
     y = 3;
@@ -15,7 +15,9 @@ class Entity {
         return (x + y);
     }
 };
-Entity e;
+let e;
+print("Start!\n");
 // class `Entity`;
 e = new Entity(0);
+print("End.\n");
 console.log(_innerConsoleLog);
