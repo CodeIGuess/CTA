@@ -1,7 +1,7 @@
-
+print("Start!\n")
 cls Entity {
     Entity(int a) {
-        print("class input: ", a)
+        print("class input: ", a, "\n")
     }
     # Remember to add different class constructors!
 
@@ -19,6 +19,8 @@ cls Entity {
 
 #Entity.sum()
 Entity e = Entity(0)
+
+print("End.\n")
 
 # This doesn't even generate the right code.
 
