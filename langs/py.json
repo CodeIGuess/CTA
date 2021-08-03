@@ -4,7 +4,7 @@
         "str": "",
         "flt": "",
         "dbl": "",
-        "def": "def",
+        "def": "",
         "cls": "class",
         "ccf": ""
     },
@@ -13,6 +13,11 @@
     "mainEnd": "",
     "compilerCommand": "",
     "conf": {
+
+        "classNamesAsVarTypes": "",
+
+        "classCodeStart": "",
+        "newClassPrefix": false,
 
         "separator": [": #{", "#}"],
 
@@ -24,6 +29,9 @@
         
         "classGenPb": ["", ""],
         "useTypeInFunction": false,
+        "useTypeInClass": false,
+
+        "useFuncTypeInClass": true,
         "funcType": [true, "def"],
 
         "stats": {
