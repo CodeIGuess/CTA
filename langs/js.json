@@ -22,6 +22,8 @@
     "compilerCommand": "",
     "conf": {
 
+        "classNamesAsVarTypes": "let",
+
         "classCodeStart": "",
         "newClassPrefix": true,
 
@@ -36,6 +38,7 @@
         "classGenPb": ["", ""],
         "useTypeInFunction": false,
         "useTypeInClass": false,
+
         "useFuncTypeInClass": false,
         "funcType": [true, "function"],
 
@@ -43,7 +46,6 @@
             "print": "print",
             "input": "prompt"
         }
-
-
+        
     }
 }
