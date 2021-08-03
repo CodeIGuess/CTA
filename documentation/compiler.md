@@ -3,6 +3,34 @@
 
 The horrors I faced while trying to make this compiler work.
 
+# Why not object oriented?
+
+Classes are at the center of object oriented programming. This is good in a way that if you know how to program in one object-oriented language, that should translate to others.
+
+This is somewhat correct.
+
+However, every language has a slightly different implementation of classes. With all the different implementations, it's very hard to make code compile to (for example) C++ and _also_ JavaScript classes.
+
+Let's say we want to convert this JavaScript code:
+```js
+class Entity {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+```
+
+To C++ code:
+```c++
+class Entity {
+    Entity() {}
+    Entity(int x, int y) {
+
+    }
+}
+```
+
 ## Python Indentation?
 
 First off, what is a code block? In C++, A code block is any chunk of code wrapped in curly brackets (`{}`). This is the same across C, JavaScript, C#, Java, C++, Go, and most other _normal_ languages. _But for some reason,_ code blocks in Python are defined by their indentation. This means that instead of writing code like this:
