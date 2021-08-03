@@ -11,25 +11,7 @@ This is somewhat correct.
 
 However, every language has a slightly different implementation of classes. With all the different implementations, it's very hard to make code compile to (for example) C++ and _also_ JavaScript classes.
 
-Let's say we want to convert this JavaScript code:
-```js
-class Entity {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}
-```
-
-To C++ code:
-```c++
-class Entity {
-    Entity() {}
-    Entity(int x, int y) {
-
-    }
-}
-```
+I'm trying to do everything I can to make the language have classes, but if everything goes wrong, it'll still have structures (which are similar to classes).
 
 ## Python Indentation?
 
