@@ -27,7 +27,6 @@
         "}\n"
     ],
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
-    "classGenPb": ["public:", "    "],
     "conf": {
 
         "classCodeStart": "public:",

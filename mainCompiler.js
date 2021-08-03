@@ -161,7 +161,6 @@ readFile(inputFileName, "utf8").then(data => {
         if ("mainStart"       in lcs) genCodeStart        = lcs.mainStart
         if ("mainEnd"         in lcs) genCodeEnd          = lcs.mainEnd
         if ("compilerCommand" in lcs) compileCommand      = lcs.compilerCommand
-        if ("classGenPb"      in lcs) classGenPb          = lcs.classGenPb
 
         if ("conf" in lcs) conf = lcs.conf
 
@@ -521,7 +520,12 @@ function modify(ast) {
             varTypes.push(addVarType)
             formattedVarTypes.push(addVarType)
 
-            ctaTypesToLangTypes[addVarType] = addVarType
+            if (conf.classNamesAsVarTypes) {
+                ctaTypesToLangTypes[addVarType] = conf.classNamesAsVarTypes
+            } else {
+                ctaTypesToLangTypes[addVarType] = addVarType
+            }
+            console.log(ctaTypesToLangTypes)
             modified[c].isMainClassName = true
         }
     }
@@ -892,12 +896,12 @@ function generate(node, parentType="") {
             let classCode = node.content
                 .map(e => generate(e, "class"))
                 .map(addSemicolon)
-                .map(e => e.split("\n").join("\n" + conf.classGenPb[1]))
+                .map(e => e.split("\n").join("\n"))
+            //console.log(conf.classCodeStart)
             classes += `class ${node.name} ${conf.separator[0]}\n`
-                + conf.classCodeStart + "\n"
-                + conf.classGenPb[0] + "\n" + conf.classGenPb[1]
-                //+ node.name + "() {} \n" + conf.classGenPb[1]
-                + classCode.join('\n' + conf.classGenPb[1])
+                + conf.classCodeStart.replace(/\{name\}/g, node.name) + " \n"
+                //+ node.name + "() {} \n"
+                + classCode.join('\n')
                 + `\n${conf.separator[1]};\n`
             return conf.commentType + ` class \`${node.name}\``
         case "ctrl":
@@ -998,6 +1002,7 @@ function generate(node, parentType="") {
             let varType = ctaTypesToLangTypes[lastVariableType]
             if ((!conf.useTypeInFunction) && parentType == "function") varType = ""
             if ((!conf.useTypeInClass) && parentType == "class") varType = ""
+            // Yikes, this is some C++ code. Very bad.
             if (node.array) varType = `Array<${varType}>`
             let declaration
             let setting
