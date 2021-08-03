@@ -13,7 +13,7 @@
 // cp -r extension/cta ~/.vscode/extensions
 
 // Version number for the -v argument.
-let vNum = "1.4.4"
+let vNum = "1.5.0"
 
 // LANGUAGE THINGS
 
@@ -520,7 +520,8 @@ function modify(ast) {
             varTypes.push(addVarType)
             formattedVarTypes.push(addVarType)
 
-            if (conf.classNamesAsVarTypes) {
+            console.log("Adding:", addVarType)
+            if (conf.classNamesAsVarTypes !== undefined && conf.classNamesAsVarTypes !== false) {
                 ctaTypesToLangTypes[addVarType] = conf.classNamesAsVarTypes
             } else {
                 ctaTypesToLangTypes[addVarType] = addVarType
@@ -897,10 +898,8 @@ function generate(node, parentType="") {
                 .map(e => generate(e, "class"))
                 .map(addSemicolon)
                 .map(e => e.split("\n").join("\n"))
-            //console.log(conf.classCodeStart)
             classes += `class ${node.name} ${conf.separator[0]}\n`
                 + conf.classCodeStart.replace(/\{name\}/g, node.name) + " \n"
-                //+ node.name + "() {} \n"
                 + classCode.join('\n')
                 + `\n${conf.separator[1]};\n`
             return conf.commentType + ` class \`${node.name}\``
@@ -962,13 +961,9 @@ function generate(node, parentType="") {
                 let var1IsArr = checkedVariableType == "arr"
                 let var2Name = generate(node.arguments[1])
                 let var2IsArr = checkedVariableType == "arr"
-                //if (var1IsArr || var2IsArr) {
                 return `(${var1Name} ${node.name} ${var2Name})`
-                //} else {
-                //    return `(${var1Name}, ${var2Name})`
-                //}
             }
-        case "arr": // Needs code here!
+        case "arr":
             if (!node.content.every( v => v[0].type === node.content[0][0].type)) {
                 error(`Found list with different data types.`, node)
             }
