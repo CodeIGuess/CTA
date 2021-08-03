@@ -29,18 +29,23 @@
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
     "conf": {
 
-        "classCodeStart": "public:",
+        "classNamesAsVarTypes": false,
+
+        "classCodeStart": "public:\n{name}() {}",
         "newClassPrefix": false,
 
         "separator": ["{", "}"],
 
         "constructor": "{name}",
+        "constructorFuncName": false,
+
         "commentType": "//",
         "stringCall": "string",
         
         "classGenPb": ["", ""],
         "useTypeInFunction": true,
         "useTypeInClass": true,
+
         "useFuncTypeInClass": true,
         "funcType": [false, ""],
 
@@ -48,5 +53,6 @@
             "print": "print",
             "input": "input"
         }
+
     }
 }
