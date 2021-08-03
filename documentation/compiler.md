@@ -3,15 +3,19 @@
 
 The horrors I faced while trying to make this compiler work.
 
-# Why not object oriented?
+CTA has an ongoing theme to it: it can only be as powerful as the weakest language it can compile to.
 
-Classes are at the center of object oriented programming. This is good in a way that if you know how to program in one object-oriented language, that should translate to others.
+Does that mean making things completely impractical just because I want to support some other language, like JavaScript?
 
-This is somewhat correct.
+***Yes.***
 
-However, every language has a slightly different implementation of classes. With all the different implementations, it's very hard to make code compile to (for example) C++ and _also_ JavaScript classes.
+# Why doesn't method overloading work?
 
-I'm trying to do everything I can to make the language have classes, but if everything goes wrong, it'll still have structures (which are similar to classes).
+Method overloading is only a feature in certain languages. So C++ has method overloading, but JavaScript just passes different parameters to the same functions.
+
+CTA needs to cater to _both_ of these languages.
+
+So here's the (slightly impractical) solution: don't allow either of these. Method overloading isn't a thing, variable parameters don't work. This is extremely inconvenient, but just shows off how impractical things have to be when you're compiling to different languages.
 
 ## Python Indentation?
 
