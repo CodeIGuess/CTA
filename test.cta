@@ -1,9 +1,9 @@
 print("Start!\n")
+
 cls Entity {
     Entity(int a) {
         print("class input: ", a, "\n")
     }
-    # Remember to add different class constructors!
 
     int x = 5
     int y = 3
@@ -18,16 +18,11 @@ cls Entity {
 # a(10)
 
 #Entity.sum()
-Entity e = Entity(0)
+Entity e = Entity(10)
 
 print("End.\n")
 
-# This doesn't even generate the right code.
-
-# print("10".toInt() + 10)
-
-# Remember to check for JSON.stringify in errors!
-
+# Fibonacci sequence test
 # def fib(int number) {
 #     flt n1 = 0
 #     flt n2 = 1
@@ -45,6 +40,4 @@ print("End.\n")
 # Errors to check for:
 #print(0 0)
 #(4 + 2 "hey")
-#int a = ((3, 0) + 2)
-#a int = 0
-#-1 # should work, doesn't
+#print("10".toInt() + 10)
