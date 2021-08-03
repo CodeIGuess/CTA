@@ -11,7 +11,7 @@ class Entity {
     public:
     Entity() {} 
     Entity(int a) {
-        (print(string("class input: ")) + print(a));
+        (print(string("class input: ")) + print(a) + print(string("\n")));
     }
     int x = 5;
     int y = 3;
@@ -21,8 +21,10 @@ class Entity {
 };
 Entity e;
 int main() {
+    print(string("Start!\n"));
     // class `Entity`;
-    e = Entity(0);
+    e = Entity(10);
+    print(string("End.\n"));
     std::cout << '\n';
     return 0;
 }
