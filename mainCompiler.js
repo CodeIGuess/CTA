@@ -13,7 +13,12 @@
 // cp -r extension/cta ~/.vscode/extensions
 
 // Version number for the -v argument.
-let vNum = "1.5.0"
+//let vNum = "1.5.0"
+
+// Import every library needed (read files, output pretty dictionaries, etc.)
+const { promises: { readFile, writeFile }, existsSync} = require("fs")
+const util = require("util")
+const { exec } = require("child_process")
 
 // LANGUAGE THINGS
 
@@ -129,72 +134,76 @@ if (inputArguments.length == 0) {
     process.exit(0)
 }
 
-// Print the compiler version
-if (inputArguments.includes("--v")) {
-    console.log("CTA Language Compiler v" + vNum)
-    process.exit(0)
-}
+// Print the compiler version and get/change build number
+let vNum = "1.5"
+readFile("version", "utf8").then(function(e){
+    e = parseInt(e)
+    if (existsSync("debug")) e += 1
+    vNum += "." + e
 
-// Import every library needed (read files, output pretty dictionaries, etc.)
-// This is done after the main code because it makes things faster
-// in case the execution stops prior to here (like with the `--v` flag)
-const { promises: { readFile, writeFile }} = require("fs")
-const util = require("util")
-const { exec } = require("child_process")
+    writeFile("version", e.toString()).then(function(err){
+        if (err != undefined) error(err)
+
+        if (inputArguments.includes("--v")) {
+            console.log("CTA Language Compiler v" + vNum)
+            process.exit(0)
+        }
+
+        readFile(inputFileName, "utf8").then(data => {
+            readFile("langs/" + outputFileType + ".json", "utf8").then(lcs => {
+                lcs = JSON.parse(lcs)
+                if ("typeConversions" in lcs) ctaTypesToLangTypes = lcs.typeConversions
+                if ("fileStart"       in lcs) genCodeLib          = lcs.fileStart
+                if ("mainStart"       in lcs) genCodeStart        = lcs.mainStart
+                if ("mainEnd"         in lcs) genCodeEnd          = lcs.mainEnd
+                if ("compilerCommand" in lcs) compileCommand      = lcs.compilerCommand
+        
+                if ("conf" in lcs) conf = lcs.conf
+        
+                if (typeof genCodeLib   != "string") genCodeLib   = genCodeLib.join("\n")
+                if (typeof genCodeStart != "string") genCodeStart = genCodeStart.join("\n")
+                if (typeof genCodeEnd   != "string") genCodeEnd   = genCodeEnd.join("\n")
+        
+                stats = conf.stats
+        
+                if (conf.funcType[0]) ctaTypesToLangTypes[conf.funcType[1]] = conf.funcType[1]
+        
+                writeFile(outputFileName, compile(data), "utf8").then(() => {
+                    if (inputArguments.includes("--p")) {
+                        compileCommand = compileCommand.replace(/\{name\}/g,
+                            outputFileName)
+                        compileCommand = compileCommand.replace(/\{nameNoExt\}/g,
+                            outputFileName.split(".").slice(0, -1).join("."))
+                        exec(compileCommand, function compileCode(err) {
+                            if (err) {
+                                error(err)
+                            }
+                        })
+                    }
+                })
+            })
+            // readFile("headers/dotfns.cpp", "utf8").then((dotfnsfile) => {
+            // }).catch(e => {
+            //     console.log(e)
+            //     error(`Dot functions file not found!`)
+            // })
+        }).catch(e => {
+            error(e)
+            error(`File \`${inputFileName}\` not found.`)
+        })
+
+    })
+})
 
 //console.log(fs.readFile("langs/c++.cta", "utf8"))
 //fs.promises.readFile("langs/cpp.cta", "utf8")
 
 let inputFileName = inputArguments[0]
 let outputFileName = inputFileName
-if (inputArguments.includes("-o")) {
+if (inputArguments.includes("-o"))
     outputFileName = inputArguments[inputArguments.indexOf("-o") + 1]
-}
 let outputFileType = outputFileName.split(".").slice(-1)[0]
-console.log(outputFileType)
-
-readFile(inputFileName, "utf8").then(data => {
-    readFile("langs/" + outputFileType + ".json", "utf8").then(lcs => {
-        lcs = JSON.parse(lcs)
-        if ("typeConversions" in lcs) ctaTypesToLangTypes = lcs.typeConversions
-        if ("fileStart"       in lcs) genCodeLib          = lcs.fileStart
-        if ("mainStart"       in lcs) genCodeStart        = lcs.mainStart
-        if ("mainEnd"         in lcs) genCodeEnd          = lcs.mainEnd
-        if ("compilerCommand" in lcs) compileCommand      = lcs.compilerCommand
-
-        if ("conf" in lcs) conf = lcs.conf
-
-        if (typeof genCodeLib   != "string") genCodeLib   = genCodeLib.join("\n")
-        if (typeof genCodeStart != "string") genCodeStart = genCodeStart.join("\n")
-        if (typeof genCodeEnd   != "string") genCodeEnd   = genCodeEnd.join("\n")
-
-        stats = conf.stats
-
-        if (conf.funcType[0]) ctaTypesToLangTypes[conf.funcType[1]] = conf.funcType[1]
-
-        writeFile(outputFileName, compile(data), "utf8").then(() => {
-            if (inputArguments.includes("--p")) {
-                compileCommand = compileCommand.replace(/\{name\}/g,
-                    outputFileName)
-                compileCommand = compileCommand.replace(/\{nameNoExt\}/g,
-                    outputFileName.split(".").slice(0, -1).join("."))
-                exec(compileCommand, function compileCode(err) {
-                    if (err) {
-                        error(err)
-                    }
-                })
-            }
-        })
-    })
-    // readFile("headers/dotfns.cpp", "utf8").then((dotfnsfile) => {
-    // }).catch(e => {
-    //     console.log(e)
-    //     error(`Dot functions file not found!`)
-    // })
-}).catch(e => {
-    error(e)
-    error(`File \`${inputFileName}\` not found.`)
-})
+if (outputFileType != "--v") console.log(outputFileType)
 
 String.prototype.any = function(c) { return this.includes(c) }
 
@@ -520,7 +529,6 @@ function modify(ast) {
             varTypes.push(addVarType)
             formattedVarTypes.push(addVarType)
 
-            console.log("Adding:", addVarType)
             if (conf.classNamesAsVarTypes !== undefined && conf.classNamesAsVarTypes !== false) {
                 ctaTypesToLangTypes[addVarType] = conf.classNamesAsVarTypes
             } else {

@@ -8,3 +8,4 @@ graphics
 .DS_Store
 .vscode
 extension/cta/.vscode
+debug
