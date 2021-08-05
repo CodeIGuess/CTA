@@ -18,6 +18,6 @@ class Entity {
 let e;
 print("Start!\n");
 // class `Entity`;
-e = new Entity(0);
+e = new Entity(10);
 print("End.\n");
 console.log(_innerConsoleLog);
