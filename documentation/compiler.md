@@ -43,6 +43,6 @@ if var == true: # {
 ```
 Yes, it's bad practice to do this, you (the programmer) should just get used to how Python syntax works.
 
-But this works _wonders_ with my code! It lets me put off reworking the way indentation works for a good while :)
+But this works _wonders_ for the generated code! It lets me put off reworking the way indentation works for a good while.
 
 Yes, eventually I'll need to rework it. This little 'workaround' increases the size of the output file quite a bit.
