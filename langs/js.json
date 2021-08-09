@@ -45,7 +45,11 @@
         "stats": {
             "print": "print",
             "input": "prompt"
-        }
+        },
+
+        "classDefault": false,
+
+        "classFirstArgument": false
         
     }
 }

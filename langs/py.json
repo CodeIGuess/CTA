@@ -8,9 +8,14 @@
         "cls": "class",
         "ccf": ""
     },
-    "fileStart": [],
+    "fileStart": [
+        "_print = print",
+        "def print(a):",
+        "    _print(str(a),end='')",
+        "    return str(a)"
+    ],
     "mainStart": "",
-    "mainEnd": "",
+    "mainEnd": "\n_print();",
     "compilerCommand": "",
     "conf": {
 
@@ -37,8 +42,11 @@
         "stats": {
             "print": "print",
             "input": "prompt"
-        }
+        },
 
+        "classDefault": "None",
+
+        "classFirstArgument": "self"
 
     }
 }
