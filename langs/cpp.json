@@ -34,7 +34,7 @@
         "classCodeStart": "public:\n{name}() {}",
         "newClassPrefix": false,
 
-        "separator": ["{", "}"],
+        "separator": [" {", "}"],
 
         "constructor": "{name}",
         "constructorFuncName": false,
@@ -52,7 +52,11 @@
         "stats": {
             "print": "print",
             "input": "input"
-        }
+        },
+
+        "classDefault": false,
+
+        "classFirstArgument": false
 
     }
 }

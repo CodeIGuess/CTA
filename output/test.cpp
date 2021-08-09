@@ -21,10 +21,10 @@ class Entity {
 };
 Entity e;
 int main() {
-    print(string("Start!\n"));
+    print(string("Started!\n"));
     // class `Entity`;
     e = Entity(10);
-    print(string("End.\n"));
+    print(string("Ended.\n"));
     std::cout << '\n';
     return 0;
 }
