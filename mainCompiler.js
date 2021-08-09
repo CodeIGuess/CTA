@@ -843,7 +843,7 @@ function pathGen(ast, path="") {
 // This generates the C++ code using the provided AST.
 // If a new language needs to be implemented, this is
 // what's most likely to be changed and/or completely reworked.
-function generate(node, parentType="") {
+function generate(node, parentType="", parentName="") {
     let code = ""
 
     if (Array.isArray(node))
@@ -874,6 +874,7 @@ function generate(node, parentType="") {
             //console.log(node.content.arguments[0])
             let args = node.content.arguments
                 .map((e) => generate(e, "function")).join(", ")
+            if (conf.classFirstArgument && parentType == "class" && node.content.name == parentName) args = conf.classFirstArgument + ", " + args
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
             if (!["def", "ccf"].includes(type)) {
@@ -890,11 +891,11 @@ function generate(node, parentType="") {
             if (conf.funcType[0] && ctaTypesToLangTypes[type].length != 0)
                 type = conf.funcType[1]
             if (conf.constructorFuncName) type = conf.funcType[1]
-            let finalFuncCode = `${node.content.name}(${args}) ${
-                conf.separator[0]}\n`
+            let finalFuncCode = `${node.content.name}(${args})${conf.separator[0]}\n`
             finalFuncCode += code.join('\n')
             finalFuncCode += `\n${conf.separator[1]}\n`
-            if (conf.useFuncTypeInClass) finalFuncCode = ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ") + finalFuncCode
+            if (conf.useFuncTypeInClass)
+                finalFuncCode = ctaTypesToLangTypes[type] + (ctaTypesToLangTypes[type].length == 0 ? "" : " ") + finalFuncCode
             if (parentType == "class") {
                 return finalFuncCode
             } else {
@@ -903,10 +904,10 @@ function generate(node, parentType="") {
             }
         case "class":
             let classCode = node.content
-                .map(e => generate(e, "class"))
+                .map(e => generate(e, "class", node.name))
                 .map(addSemicolon)
                 .map(e => e.split("\n").join("\n"))
-            classes += `class ${node.name} ${conf.separator[0]}\n`
+            classes += `class ${node.name}${conf.separator[0]}\n`
                 + conf.classCodeStart.replace(/\{name\}/g, node.name) + " \n"
                 + classCode.join('\n')
                 + `\n${conf.separator[1]};\n`
@@ -1009,17 +1010,19 @@ function generate(node, parentType="") {
             if (node.array) varType = `Array<${varType}>`
             let declaration
             let setting
+            declaration = `${varType + (varType.length == 0 ?
+                "" : " ")}${node.content.name}`
             if (node.content.content == undefined) {
-                declaration = `${varType + (varType.length == 0 ?
-                    "" : " ")}${node.content.name}`
                 setting = undefined
             } else {
-                declaration = `${varType + (varType.length == 0 ?
-                    "" : " ")}${node.content.name}`
                 setting = generate(node.content.content)
             }
             if (parentType == "Program") {
-                variableCode += declaration + ';\n'
+                if (conf.classDefault) {
+                    variableCode += declaration + " = " + conf.classDefault + ";\n"
+                } else {
+                    variableCode += declaration + ';\n'
+                }
                 if (setting != undefined) {
                     return node.content.name + " = " + setting
                 } else {
