@@ -1,15 +1,20 @@
-class Entity : #{
-    def __init__(a) : #{
+_print = print
+def print(a):
+    _print(str(a),end='')
+    return str(a)
+class Entity: #{
+    def __init__(self, a): #{
         (print("class input: ") + print(a) + print("\n"));
     #}
     x = 5;
     y = 3;
-    def sum() : #{
+    def sum(): #{
         return (x + y);
     #}
 #};
-e;
-print("Start!\n");
+e = None;
+print("Started!\n");
 # class `Entity`;
-e = Entity(0);
-print("End.\n");
+e = Entity(10);
+print("Ended.\n");
+_print();

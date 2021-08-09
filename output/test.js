@@ -5,19 +5,19 @@ function print(a) {
     while (a.length > 1) console.log(a.shift())
     _innerConsoleLog = a[0]
 }
-class Entity {
-    constructor(a) {
+class Entity{
+    constructor(a){
         (print("class input: ") + print(a) + print("\n"));
     }
     x = 5;
     y = 3;
-    sum() {
+    sum(){
         return (x + y);
     }
 };
 let e;
-print("Start!\n");
+print("Started!\n");
 // class `Entity`;
 e = new Entity(10);
-print("End.\n");
+print("Ended.\n");
 console.log(_innerConsoleLog);
