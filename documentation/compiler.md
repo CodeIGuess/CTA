@@ -46,3 +46,13 @@ Yes, it's bad practice to do this, you (the programmer) should just get used to 
 But this works _wonders_ for the generated code! It lets me put off reworking the way indentation works for a good while.
 
 Yes, eventually I'll need to rework it. This little 'workaround' increases the size of the output file quite a bit.
+
+# Versions
+
+The versioning system was a _treat_ to work with. I desperately needed a way to increment versions since my only mark for changing the version was every time I did a commit. It's just a file that stores a single integer number (as text, nothing fancy) which is incremented every time the compiler is ran. It sounds weird, but it really works.
+
+This uses a pretty simple versioning paradigmn:
+```
+  (Major) . (Minor) . (Build)
+    1.4.40
+```
