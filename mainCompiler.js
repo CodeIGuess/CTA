@@ -874,7 +874,8 @@ function generate(node, parentType="", parentName="") {
             //console.log(node.content.arguments[0])
             let args = node.content.arguments
                 .map((e) => generate(e, "function")).join(", ")
-            if (conf.classFirstArgument && parentType == "class" && node.content.name == parentName) args = conf.classFirstArgument + ", " + args
+            if (conf.classFirstArgument && parentType == "class")
+                args = conf.classFirstArgument + (args.length != 0 ? ", " : "") + args
             let code = node.content.content.map(generate).map(addSemicolon)
             let type = node.content.type.replace("Type", '')
             if (!["def", "ccf"].includes(type)) {
@@ -961,10 +962,8 @@ function generate(node, parentType="", parentName="") {
         case "opr":
             if (node.name == '.') {
                 let varName = generate(node.arguments[0])
-                let fnCall = generate(node.arguments[1]).split("(")
-                return `_DotFns_::${fnCall[0]}(${varName}${
-                    fnCall.slice(1).join("(").length > 1 ? ", " : ""
-                    }${fnCall.slice(1).join("(")}`
+                let fnCall = generate(node.arguments[1])
+                return `${varName}.${fnCall}`
             } else {
                 let var1Name = generate(node.arguments[0])
                 let var1IsArr = checkedVariableType == "arr"
@@ -1139,6 +1138,18 @@ function getVarType(ast, path, nam) {
     if (node == undefined) return undefined
     if (node.array) return "arr"
     return node.content.type
+}
+
+// Checks if a variable is in a class to add the "this." (or
+// whatever is in `conf.classVariableReference`) as a prefix.
+// This one should stay after `getVarType` gets reworked, as
+// it's completely separate to getting the actual variable.
+// NOTE: This means `getVar` also needs to stay.
+function inClass(ast, path, nam) {
+    let node = getVar(ast, path, getPath(ast, path).content)
+    if (node == undefined) return undefined
+    console.log()
+    // unfinished
 }
 
 // This should be the actual function used instead of getVarType,
