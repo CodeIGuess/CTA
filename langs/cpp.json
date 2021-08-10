@@ -56,7 +56,8 @@
 
         "classDefault": false,
 
-        "classFirstArgument": false
+        "classFirstArgument": false,
+        "classVariableReference": "this->"
 
     }
 }
