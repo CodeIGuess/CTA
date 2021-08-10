@@ -1,4 +1,3 @@
-print("Started!\n")
 
 cls Entity {
     Entity(int a) {
@@ -17,10 +16,8 @@ cls Entity {
 # }
 # a(10)
 
-#Entity.sum()
 Entity e = Entity(10)
-
-print("Ended.\n")
+print(e.sum(), "\n")
 
 # Fibonacci sequence test
 # def fib(int number) {
