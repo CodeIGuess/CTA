@@ -46,7 +46,8 @@
 
         "classDefault": "None",
 
-        "classFirstArgument": "self"
+        "classFirstArgument": "self",
+        "classVariableReference": "self."
 
     }
 }
