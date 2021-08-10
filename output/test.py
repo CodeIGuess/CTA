@@ -8,13 +8,12 @@ class Entity: #{
     #}
     x = 5;
     y = 3;
-    def sum(): #{
+    def sum(self): #{
         return (x + y);
     #}
 #};
 e = None;
-print("Started!\n");
 # class `Entity`;
 e = Entity(10);
-print("Ended.\n");
+(print(e.sum()) + print("\n"));
 _print();
