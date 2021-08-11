@@ -27,7 +27,7 @@
         "classCodeStart": "",
         "newClassPrefix": true,
 
-        "separator": [" ", "}"],
+        "separator": [" {", "}"],
 
         "constructor": "constructor",
         "constructorFuncName": false,
