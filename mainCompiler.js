@@ -994,8 +994,8 @@ function generate(node, parentType="", parentName="") {
         case "nam":
             if (![...keyWords].includes(node.content)) {
                 let varType = getVarType(fullAst, node.path, node.content)
-                if (varType == undefined)
-                    error(`Variable \`${node.content}\` not declared`)
+                // if (varType == undefined)
+                //     error(`Variable \`${node.content}\` not declared`, node)
                 if (varType == "pred") return predefinedVals[node.content].content
                 checkedVariableType = varType
             }
@@ -1064,11 +1064,12 @@ function indent(code, i) {
     for (let a = 0; a < code.length; a++) {
         if (code[a][code[a].length - 1] == ';' ? 
             "}".includes(code[a][code[a].length - 2]) : 
-            ")]}".includes(code[a][code[a].length - 1])) i--
+            "}".includes(code[a][code[a].length - 1])) i--
+        if (i < 0) error("\n  " + code[a - 1] + "\n  " + code[a] + "\n  " + code[a + 1])
         code[a] = "    ".repeat(i) + code[a]
         if (code[a][code[a].length - 1] == ';' ?
-            "([{".includes(code[a][code[a].length - 2]) :
-            "([{".includes(code[a][code[a].length - 1])) i++
+            "{".includes(code[a][code[a].length - 2]) :
+            "{".includes(code[a][code[a].length - 1])) i++
     }
     return code.join("\n")
 }
@@ -1086,6 +1087,7 @@ function getPath(ast, path) {
 // happens when a variable wasn't declared, or is out
 // of scope) this function returns `undefined`.
 function getVar(ast, path, nam) {
+    console.log(`Getting var ${nam}`)
     path = path.split(".")
     let checkedForPath = "..."
     let last = path.pop()
