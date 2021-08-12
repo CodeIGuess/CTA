@@ -29,6 +29,15 @@
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
     "conf": {
 
+        "controlMap": {
+            "if": "if",
+            "elif": "else if",
+            "else": "else",
+            "while": "while",
+            "for": "for",
+            "scan": "for"
+        },
+
         "classNamesAsVarTypes": false,
 
         "classCodeStart": "public:\n{name}() {}",

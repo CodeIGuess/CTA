@@ -19,6 +19,15 @@
     "compilerCommand": "",
     "conf": {
 
+        "controlMap": {
+            "if": "if",
+            "elif": "elif",
+            "else": "else",
+            "while": "while",
+            "for": "for",
+            "scan": "for"
+        },
+
         "classNamesAsVarTypes": "",
 
         "classCodeStart": "",

@@ -22,6 +22,15 @@
     "compilerCommand": "",
     "conf": {
 
+        "controlMap": {
+            "if": "if",
+            "elif": "else if",
+            "else": "else",
+            "while": "while",
+            "for": "for",
+            "scan": "for"
+        },
+
         "classNamesAsVarTypes": "let",
 
         "classCodeStart": "",
