@@ -106,7 +106,7 @@ let operationFunctions = {
 }
 
 // Just like the `keyWords` thing, but CTA has some custom behavior for the inputs of these.
-let controlFlow = ["if", "while", "for", "scan"]
+let controlFlow = ["if", "elif", "else", "while", "for", "scan"]
 
 // Things that can't be used as variable names.
 let noVarNames = [...varTypes, ...controlFlow, ...Object.keys(stats), ...keyWords]
@@ -242,10 +242,10 @@ function compile(program) {
     let ast      = parse   (tokens)
     modify        (ast)
     operations    (ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     variables     (ast)
     control       (ast)
     adjacentTokens(ast)
-    // console.log("\n" + util.inspect(ast, false, null, true))
     pathGen       (ast)
     fullAst = ast
     let code     = genCodeStart + generate(ast) + genCodeEnd
@@ -462,6 +462,7 @@ function parse(tokens) {
         if (token.type == "oblk") {
             let node = {type: "block", content: []}
             c++
+            node.posInfo = token.posInfo
             token = walk()
             while (token.type != "cblk") {
                 node.content.push(token)
@@ -614,8 +615,7 @@ function variables(ast) {
     while (c < declaredVars.length) {
         let p = declaredVars[c++]
         if (["paren", "arr"].includes(p.type)) {
-            p.content = p.content.map(e => variables({
-                content: e, type: p.type}).content)
+            p.content = p.content.map(e => variables({content: e, type: p.type}).content)
         } else if (p.type == "block") {
             p = variables(p)
         } else if (p.type == "call") {
@@ -738,7 +738,11 @@ function control(ast) {
                         }).content)
             }
         } else if (p.type == "ctrl") {
-            p.arguments = p.arguments.map(e => control({content: e}).content)
+            if (p.content == "else") {
+                p.arguments = []
+            } else {
+                p.arguments = p.arguments.map(e => control({content: e}).content)
+            }
             p.name = p.content
             if (modified[c].type == "block") {
                 p.content = control(modified[c]).content
@@ -937,21 +941,28 @@ function generate(node, parentType="", parentName="") {
                         ]
                     }
                 }
-                return node.name + " ("
-                    + args.join("; ") + ") {\n"
+                return conf.controlMap[node.name] + " ("
+                    + args.join("; ") + ")" + conf.separator[0] + "\n"
                     + node.content.map(generate).map(addSemicolon).join("\n")
-                    + "\n}"
-            } else if (node.arguments.length != 1) {
+                    + "\n" + conf.separator[1]
+            } else if (node.arguments.length != 1 && node.name != "else") {
                 error(`Didn't expect ${
                     node.arguments.length} arguments for \`${node.name}\``)
             }
             if (node.content == undefined) {
-                error("For some reason the if statement didn't get a block? Idk.")
+                error(`For some reason, ${node.name} statement doesn't have a block?`,
+                    node)
             }
-            return node.name + " ("
-                + node.arguments.map(generate).join(", ") + ") {\n"
-                + node.content.map(generate).map(addSemicolon).join("\n")
-                + "\n}"
+            if (node.name == "else") {
+                return conf.controlMap[node.name] + conf.separator[0] + "\n"
+                    + node.content.map(generate).map(addSemicolon).join("\n")
+                    + "\n" + conf.separator[1]
+            } else {
+                return conf.controlMap[node.name] + " ("
+                    + node.arguments.map(generate).join(", ") + ")" + conf.separator[0] + "\n"
+                    + node.content.map(generate).map(addSemicolon).join("\n")
+                    + "\n" + conf.separator[1]
+            }
         case "num":
             return node.content
         case "str":
