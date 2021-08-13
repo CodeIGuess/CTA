@@ -5,18 +5,13 @@ function print(a) {
     while (a.length > 1) console.log(a.shift())
     _innerConsoleLog = a[0]
 }
-class Entity {
-    constructor(a) {
-        (print("class input: ") + print(a) + print("\n"));
-    }
-    x = 5;
-    y = 3;
-    sum() {
-        return (x + y);
-    }
-};
-let e;
-// class `Entity`;
-e = new Entity(10);
-(print(e.sum()) + print("\n"));
+if (1) {
+    print("If!");
+}
+else if (1) {
+    print("Else if!");
+}
+else {
+    print("Else!");
+}
 console.log(_innerConsoleLog);
