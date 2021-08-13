@@ -509,6 +509,7 @@ function modify(ast) {
             p.arguments = p.arguments.map(e => modify({content: e}).content)
         } else if (p.type == "nam") {
             if (c >= modified.length) continue
+            //console.log(modified[c])
             if (modified[c].type == "paren") {
                 p.type = "call"
                 for (let a = 0; a < modified[c].content.length; a++) {
@@ -621,6 +622,7 @@ function variables(ast) {
         } else if (p.type == "call") {
             p.arguments = p.arguments.map(e => variables({content: e}).content)
         } else if (p.type == "ctrl") {
+            console.log(p)
             p.arguments = p.arguments.map(e => variables({content: e}).content)
         } else if (formattedVarTypes.includes(p.type)) {
             if (["paren", "arr"].includes(ast.type))
@@ -667,6 +669,16 @@ function variables(ast) {
             }
             checkVarName(p.content.name, "variable")
         } else if (p.type == "nam") {
+            // This is semi-unstable, but it works well enough for
+            // control flow operations that don't require arguments
+            // (like `else`, `try`, and `catch` (the last two haven't
+            // been implemented though))
+            if (controlFlow.includes(p.content)) {
+                p.type = "ctrl"
+                p.arguments = []
+                c--
+                continue
+            }
             if (c >= declaredVars.length) continue
             if (declaredVars[c].type == "sep")
                 error(`Misplaced separator, the comma doesn't do anything here.`)
