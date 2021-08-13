@@ -1,23 +1,33 @@
 
-cls Entity {
-    Entity(int a) {
-        print("class input: ", a, "\n")
-    }
-
-    int x = 5
-    int y = 3
-    int sum() {
-        x + y
-    }
+if (0) {
+    print("If!")
+} elif (0) {
+    print("Else if!")
+} else {
+    print("Else!")
 }
+
+# cls Entity {
+
+#     int x = 5
+#     int y = 3
+
+#     Entity(int a, int b) {
+#         this.x = a
+#         this.y = b
+#     }
+#     int sum() {
+#         x + y
+#     }
+# }
 
 # def a(int num) {
 #     print("The number is:", num)
 # }
 # a(10)
 
-Entity e = Entity(10)
-print(e.sum(), "\n")
+# Entity e = Entity(10)
+# print(e.sum(), "\n")
 
 # Fibonacci sequence test
 # def fib(int number) {
