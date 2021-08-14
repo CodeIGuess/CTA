@@ -19,6 +19,8 @@
     "compilerCommand": "",
     "conf": {
 
+        "arrDeclare": ["[", "]"],
+
         "controlMap": {
             "if": "if",
             "elif": "elif",
