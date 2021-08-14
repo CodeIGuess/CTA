@@ -11,6 +11,7 @@
     "fileStart": [
         "let _innerConsoleLog = ''",
         "function print(a) {",
+        "    if (a == undefined) a = ''",
         "    a = a.toString().split('\\n')",
         "    a[0] = _innerConsoleLog + a[0]",
         "    while (a.length > 1) console.log(a.shift())",
@@ -21,6 +22,8 @@
     "mainEnd": "\nconsole.log(_innerConsoleLog);\n",
     "compilerCommand": "",
     "conf": {
+
+        "arrDeclare": ["[", "]"],
 
         "controlMap": {
             "if": "if",
