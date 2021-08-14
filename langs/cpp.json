@@ -29,6 +29,8 @@
     "compilerCommand": "g++ -std=c++11 {name} -o {nameNoExt}",
     "conf": {
 
+        "arrDeclare": ["Array<{type}>(vector<{type}>{", "})"],
+
         "controlMap": {
             "if": "if",
             "elif": "else if",
