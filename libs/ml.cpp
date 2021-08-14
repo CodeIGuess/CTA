@@ -1,6 +1,10 @@
 /*
 NOTE: THIS HERE IS ***NOT*** MY CODE!
 I don't know where I found it exactly, but the code isn't mine.
+
+Now that that's out of the way, here's why this is here.
+This is an example neural network build with pure C++ (using some built-in libraries)
+
 */
 
 // Had a lot of trouble with shuffle
@@ -12,14 +16,12 @@ I don't know where I found it exactly, but the code isn't mine.
 #include <math.h>
 
 #define PI 3.141592653589793238463
-#define N
 
-#define epsilon 0.1
-#define epoch 2000
+#define epoch 200000
 
 using namespace std;
 // Just for GNU Plot issues
-extern "C" FILE *popen(const char *command, const char *mode);
+// extern "C" FILE *popen(const char *command, const char *mode);
 
 // Defining activation functions
 //double sigmoid(double x) { return 1.0f / (1.0f + exp(-x)); }
@@ -31,7 +33,7 @@ double lin(double x) { return x; }
 double dlin(double x) { return 1.0f; }
 
 double init_weight() { return (2 * rand() / RAND_MAX - 1); }
-double MAXX = -9999999999999999; //maximum value of input example
+double MAXX = -9999999999999999; // Maximum value of input example
 
 // Network Configuration
 static const int numInputs = 1;
@@ -55,8 +57,7 @@ double training_inputs[numTrainingSets][numInputs];
 double training_outputs[numTrainingSets][numOutputs];
 
 // Shuffling the data with each epoch
-void shuffle(int *array, size_t n)
-{
+void shuffle(int *array, size_t n) {
     if (n > 1) {
         size_t i;
         for (i = 0; i < n - 1; i++) {
@@ -69,8 +70,7 @@ void shuffle(int *array, size_t n)
 }
 
 // Forward Propagation. Only used after training is done.
-void predict(double test_sample[])
-{
+void predict(double test_sample[]) {
     for (int j = 0; j < numHiddenNodes; j++) {
         double activation = hiddenLayerBias[j];
         for (int k = 0; k < numInputs; k++) {
@@ -88,15 +88,14 @@ void predict(double test_sample[])
     }
 }
 
-int main(int argc, const char *argv[])
-{
-    ///TRAINING DATA GENERATION
+int main(int argc, const char *argv[]) {
+    // TRAINING DATA GENERATION
     for (int i = 0; i < numTrainingSets; i++) {
         double p = (2 * PI * (double)i / numTrainingSets);
         training_inputs[i][0] = (p);
         training_outputs[i][0] = sin(p);
 
-        ///FINDING NORMALIZING FACTOR
+        // FINDING NORMALIZING FACTOR
         for (int m = 0; m < numInputs; ++m)
             if (MAXX < training_inputs[i][m])
                 MAXX = training_inputs[i][m];
@@ -105,7 +104,7 @@ int main(int argc, const char *argv[])
                 MAXX = training_outputs[i][m];
     }
 
-    ///NORMALIZING
+    // NORMALIZING
     for (int i = 0; i < numTrainingSets; i++) {
         for (int m = 0; m < numInputs; ++m)
             training_inputs[i][m] /= 1.0f * MAXX;
@@ -115,7 +114,7 @@ int main(int argc, const char *argv[])
 
         cout << "In: " << training_inputs[i][0] << "  out: " << training_outputs[i][0] << endl;
     }
-    ///WEIGHT & BIAS INITIALIZATION
+    // WEIGHT & BIAS INITIALIZATION
     for (int i = 0; i < numInputs; i++) {
         for (int j = 0; j < numHiddenNodes; j++) {
             hiddenWeights[i][j] = init_weight();
@@ -132,26 +131,26 @@ int main(int argc, const char *argv[])
         outputLayerBias[i] = 0;
     }
 
-    ///FOR INDEX SHUFFLING
+    // FOR INDEX SHUFFLING
     int trainingSetOrder[numTrainingSets];
     for (int j = 0; j < numInputs; ++j)
         trainingSetOrder[j] = j;
 
-    ///TRAINING
-    //std::cout<<"start train\n";
-    vector<double> performance, epo; ///STORE MSE, EPOCH
+    // TRAINING
+    //std::cout << "start train\n";
+    vector<double> performance, epo; //STORE MSE, EPOCH
     for (int n = 0; n < epoch; n++) {
         double MSE = 0;
         shuffle(trainingSetOrder, numTrainingSets);
-        std::cout << "epoch :" << n << "\n";
+        std::cout << "epoch: " << n << "\n";
         for (int i = 0; i < numTrainingSets; i++) {
             //int i = trainingSetOrder[x];
             int x = i;
-            //std::cout<<"Training Set :"<<x<<"\n";
-            /// Forward pass
+            //std::cout << "Training Set: " << x << "\n";
+            // Forward pass
             for (int j = 0; j < numHiddenNodes; j++) {
                 double activation = hiddenLayerBias[j];
-                //std::cout<<"Training Set :"<<x<<"\n";
+                //std::cout << "Training Set: " << x << "\n";
                 for (int k = 0; k < numInputs; k++) {
                     activation += training_inputs[x][k] * hiddenWeights[k][j];
                 }
@@ -166,19 +165,19 @@ int main(int argc, const char *argv[])
                 outputLayer[j] = lin(activation);
             }
 
-            //std::cout << "Input:" << training_inputs[x][0] << " " << "    Output:" << outputLayer[0] << "    Expected Output: " << training_outputs[x][0] << "\n";
+            // std::cout << "Input: " << training_inputs[x][0] << " " << "    Output:" << outputLayer[0] << "    Expected Output: " << training_outputs[x][0] << "\n";
             for (int k = 0; k < numOutputs; ++k)
                 MSE += (1.0f / numOutputs) * pow(training_outputs[x][k] - outputLayer[k], 2);
 
-            /// Backprop
-            ///   For V
+            // Backprop
+            // For V
             double deltaOutput[numOutputs];
             for (int j = 0; j < numOutputs; j++) {
                 double errorOutput = (training_outputs[i][j] - outputLayer[j]);
                 deltaOutput[j] = errorOutput * dlin(outputLayer[j]);
             }
 
-            ///   For W
+            // For W
             double deltaHidden[numHiddenNodes];
             for (int j = 0; j < numHiddenNodes; j++) {
                 double errorHidden = 0.0f;
@@ -188,8 +187,8 @@ int main(int argc, const char *argv[])
                 deltaHidden[j] = errorHidden * dtanh(hiddenLayer[j]);
             }
 
-            ///Updation
-            ///   For V and b
+            // Update
+            // For V and b
             for (int j = 0; j < numOutputs; j++) {
                 //b
                 outputLayerBias[j] += deltaOutput[j] * lr;
@@ -198,7 +197,7 @@ int main(int argc, const char *argv[])
                 }
             }
 
-            ///   For W and c
+            // For W and c
             for (int j = 0; j < numHiddenNodes; j++) {
                 //c
                 hiddenLayerBias[j] += deltaHidden[j] * lr;
@@ -208,10 +207,11 @@ int main(int argc, const char *argv[])
                 }
             }
         }
-        //Averaging the MSE
+        // Averaging the MSE
         MSE /= 1.0f * numTrainingSets;
-        //cout<< "  MSE: "<< MSE<<endl;
-        ///Steps to PLOT PERFORMANCE PER EPOCH
+        std::cout << MSE << " ";
+        //cout << "  MSE: " << MSE << endl;
+        // Steps to PLOT PERFORMANCE PER EPOCH
         performance.push_back(MSE * 100);
         epo.push_back(n);
     }
@@ -232,7 +232,7 @@ int main(int argc, const char *argv[])
         std::cout << hiddenLayerBias[j] << " ";
     }
     std::cout << "]\n";
-    std::cout << "Final Output Weights";
+    std::cout << "Final Output Weights ";
     for (int j = 0; j < numOutputs; j++) {
         std::cout << "[ ";
         for (int k = 0; k < numHiddenNodes; k++) {
