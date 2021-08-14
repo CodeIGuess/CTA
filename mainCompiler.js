@@ -66,6 +66,7 @@ let predefinedVals = {
 
 // Converts CTA types to user-readable format.
 let fullTokenNames = {
+    "nam": "name",
     "num": "number",
     "opr": "operation",
     "str": "string",
@@ -203,7 +204,7 @@ let outputFileName = inputFileName
 if (inputArguments.includes("-o"))
     outputFileName = inputArguments[inputArguments.indexOf("-o") + 1]
 let outputFileType = outputFileName.split(".").slice(-1)[0]
-if (outputFileType != "--v") console.log(outputFileType)
+// if (outputFileType != "--v") console.log(outputFileType)
 
 String.prototype.any = function(c) { return this.includes(c) }
 
@@ -242,9 +243,9 @@ function compile(program) {
     let ast      = parse   (tokens)
     modify        (ast)
     operations    (ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
     variables     (ast)
     control       (ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     adjacentTokens(ast)
     pathGen       (ast)
     fullAst = ast
@@ -685,6 +686,18 @@ function variables(ast) {
             if (declaredVars[c].type.includes("Type"))
                 error(`No idea what this means. Try swapping \`${
                 p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
+            if (declaredVars[c].type == "arr") {
+                declaredVars[c] = {
+                    type: "opr",
+                    name: "[]",
+                    arguments: [
+                        declaredVars[c - 1],
+                        declaredVars[c]
+                    ]
+                }
+                declaredVars.splice(c - 1, 1)
+                continue
+            }
             if (declaredVars[c].type != "opr")
                 error(`No idea what this means.`, declaredVars[c])
             if (c >= declaredVars.length - 1)
@@ -987,31 +1000,36 @@ function generate(node, parentType="", parentName="") {
                 let varName = generate(node.arguments[0])
                 let fnCall = generate(node.arguments[1])
                 return `${varName}.${fnCall}`
+            } else if (node.name == "[]") {
+                let varName = generate(node.arguments[0])
+                let arrIdx = generate(node.arguments[1])
+                return `${varName}${arrIdx}`
             } else {
                 let var1Name = generate(node.arguments[0])
-                let var1IsArr = checkedVariableType == "arr"
                 let var2Name = generate(node.arguments[1])
-                let var2IsArr = checkedVariableType == "arr"
                 return `(${var1Name} ${node.name} ${var2Name})`
             }
         case "arr":
             if (!node.content.every( v => v[0].type === node.content[0][0].type)) {
                 error(`Found list with different data types.`, node)
             }
-            let inferredType = node.content[0][0].type
-            if (inferredType == "str" && lastVariableType != "str") {
-                error(`Can't assign variable type \`string\` to type \`${
-                    formattedVarTypes[lastVariableType]}\``)
-            } else if (inferredType == "num" && lastVariableType == "str") {
-                error(`Can't assign variable type \`number\` to type \`string\``)
-            }
+            // let inferredType = node.content[0][0].type
+            // if (inferredType == "str" && lastVariableType != "str") {
+            //     error(`Can't assign variable type \`string\` to type \`${
+            //         formattedVarTypes[lastVariableType]}\``)
+            // } else if (inferredType == "num" && lastVariableType == "str") {
+            //     error(`Can't assign variable type \`number\` to type \`string\``)
+            // }
             let castType = ""
             if (lastVariableType == "int") {
                 castType = "(int)"
             }
-            return `Array<${ctaTypesToLangTypes[lastVariableType]}>(vector<${
-                ctaTypesToLangTypes[lastVariableType]}>{` + node.content.map(
-                    e => castType + generate(e)).join(", ") + "})"
+            return conf.arrDeclare[0].replace("{type}", ctaTypesToLangTypes[lastVariableType])
+                + node.content.map(e => castType + generate(e)).join(", ")
+                + conf.arrDeclare[1].replace("{type}", ctaTypesToLangTypes[lastVariableType])
+            // return `Array<${ctaTypesToLangTypes[lastVariableType]}>(vector<${
+            //     ctaTypesToLangTypes[lastVariableType]}>{` + node.content.map(
+            //         e => castType + generate(e)).join(", ") + "})"
         case "paren":
             return `(${node.content.map(generate).join(" ")})`
         case "nam":
@@ -1110,7 +1128,7 @@ function getPath(ast, path) {
 // happens when a variable wasn't declared, or is out
 // of scope) this function returns `undefined`.
 function getVar(ast, path, nam) {
-    console.log(`Getting var ${nam}`)
+    // console.log(`Getting var ${nam}`)
     path = path.split(".")
     let checkedForPath = "..."
     let last = path.pop()
