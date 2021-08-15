@@ -136,7 +136,7 @@ if (inputArguments.length == 0) {
 }
 
 // Print the compiler version and get/change build number
-let vNum = "1.5"
+let vNum = "1.6"
 readFile("version", "utf8").then(function(e){
     e = parseInt(e)
     if (existsSync("debug")) e += 1
@@ -243,9 +243,9 @@ function compile(program) {
     let ast      = parse   (tokens)
     modify        (ast)
     operations    (ast)
+    console.log("\n" + util.inspect(ast, false, null, true))
     variables     (ast)
     control       (ast)
-    console.log("\n" + util.inspect(ast, false, null, true))
     adjacentTokens(ast)
     pathGen       (ast)
     fullAst = ast
@@ -596,13 +596,16 @@ function operations(ast) {
                 arguments: [
                     modified[c - 2],
                     modified[c]
-                ]
+                ],
+                posInfo: p.posInfo
             })
             modified.splice(--c, 3)
-        } else if (p.type == "nam"
-            && varTypes.includes(p.content)
-            && !p.isMainClassName) {
-            p.type = p.content
+        } else if (p.type == "nam") {
+            if (varTypes.includes(p.content) && !p.isMainClassName) {
+                p.type = p.content
+            } else if (c < modified.length && modified[c]) {
+                // Work on this :)
+            }
         }
     }
     return ast
@@ -686,22 +689,24 @@ function variables(ast) {
             if (declaredVars[c].type.includes("Type"))
                 error(`No idea what this means. Try swapping \`${
                 p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
-            if (declaredVars[c].type == "arr") {
-                declaredVars[c] = {
-                    type: "opr",
-                    name: "[]",
-                    arguments: [
-                        declaredVars[c - 1],
-                        declaredVars[c]
-                    ]
-                }
-                declaredVars.splice(c - 1, 1)
-                continue
-            }
+            // if (declaredVars[c].type == "arr") {
+            //     declaredVars[c] = {
+            //         type: "opr",
+            //         name: "[]",
+            //         arguments: [
+            //             declaredVars[c - 1],
+            //             declaredVars[c]
+            //         ],
+            //         posInfo: declaredVars[c]
+            //     }
+            //     declaredVars.splice(c - 1, 1)
+            //     continue
+            // }
             if (declaredVars[c].type != "opr")
                 error(`No idea what this means.`, declaredVars[c])
+            console.log(declaredVars[c])
             if (c >= declaredVars.length - 1)
-                error(`Expected something after \`${declaredVars[c].content}\``)
+                error(`Expected something after \`${declaredVars[c].type}\``, declaredVars[c])
             checkVarName(p.content, "variable", p)
             p.content = {
                 type: declaredVars[c].content,
