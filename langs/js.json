@@ -9,6 +9,7 @@
         "ccf": ""
     },
     "fileStart": [
+        "if (typeof window === 'undefined') { window = global }",
         "let _innerConsoleLog = ''",
         "function print(a) {",
         "    if (a == undefined) a = ''",
@@ -18,8 +19,15 @@
         "    _innerConsoleLog = a[0]",
         "}\n"
     ],
-    "mainStart": "",
-    "mainEnd": "\nconsole.log(_innerConsoleLog);\n",
+    "mainStart": "async function main() {\n",
+    "mainEnd": [
+        "",
+        "}",
+        "(async function() { ",
+        "    await main()",
+        "    console.log(_innerConsoleLog);",
+        "})()"
+    ],
     "compilerCommand": "",
     "conf": {
 
