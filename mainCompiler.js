@@ -503,6 +503,19 @@ function modify(ast) {
     while (c < modified.length) {
         let p = modified[c++]
         if (["paren", "arr"].includes(p.type)) {
+            if (c > 1 && modified[c - 2].type == "nam") {
+                if (p.content.length == 0) error(`Index needs an argument.`, p) // Untested
+                modified[c - 2] = {
+                    type: "opr",
+                    name: "[]",
+                    arguments: [
+                        modified[c - 2],
+                        modified[c - 1]
+                    ],
+                    posInfo: modified[c - 1]
+                }
+                modified.splice(c - 1, 1)
+            }
             p.content = p.content.map(e => modify({content: e}).content)
         } else if (p.type == "block") {
             p = modify(p)
