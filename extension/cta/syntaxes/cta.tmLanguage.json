@@ -15,7 +15,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.cta",
-				"match": "\\b(if|elif|else|while|for|return|scan|continue|break)\\b"
+				"match": "\\b(if|elif|else|while|for|return|scan|continue|break|import)\\b"
 			}, {
 				"name": "keyword.type.cta",
 				"match": "\\b(str|int|flt|dbl|def|true|false|cls|this)\\b"
