@@ -25,7 +25,7 @@
         "}",
         "(async function() { ",
         "    await main()",
-        "    console.log(_innerConsoleLog);",
+        "    console.log(_innerConsoleLog)",
         "})()"
     ],
     "compilerCommand": "",
