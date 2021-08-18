@@ -56,7 +56,7 @@ let varTypes = ["int", "str", "flt", "dbl", "def", "cls"]
 let formattedVarTypes = varTypes.map(e => e + "Type")
 
 // Keywords are things that can't be used as variables, but are just normal language things
-let keyWords = ["return", "break", "continue", "class", "this"]
+let keyWords = ["return", "break", "continue", "class", "this", "import"]
 
 // Variables with predefined values
 let predefinedVals = {
@@ -702,19 +702,16 @@ function variables(ast) {
             if (declaredVars[c].type.includes("Type"))
                 error(`No idea what this means. Try swapping \`${
                 p.content}\` and \`${declaredVars[c].type.replace("Type","")}\``)
-            // if (declaredVars[c].type == "arr") {
-            //     declaredVars[c] = {
-            //         type: "opr",
-            //         name: "[]",
-            //         arguments: [
-            //             declaredVars[c - 1],
-            //             declaredVars[c]
-            //         ],
-            //         posInfo: declaredVars[c]
-            //     }
-            //     declaredVars.splice(c - 1, 1)
-            //     continue
-            // }
+            if (c > 0 && declaredVars[c - 1].type == "nam" && declaredVars[c - 1].content == "import") {
+                declaredVars[c - 1] = {
+                    type: "import",
+                    content: declaredVars[c].content,
+                    posInfo: declaredVars[c].posInfo
+                }
+                declaredVars.splice(c, 1)
+                console.log(declaredVars)
+                continue
+            }
             if (declaredVars[c].type != "opr")
                 error(`No idea what this means.`, declaredVars[c])
             console.log(declaredVars[c])
@@ -1059,6 +1056,8 @@ function generate(node, parentType="", parentName="") {
                 checkedVariableType = varType
             }
             return node.content
+        case "import":
+            return `import ${node.content}`
         case "declare":
             lastVariableType = node.content.type.replace('Type', '')
             let varType = ctaTypesToLangTypes[lastVariableType]
