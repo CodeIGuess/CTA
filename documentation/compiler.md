@@ -56,3 +56,13 @@ This uses a pretty simple versioning paradigmn:
   (Major) . (Minor) . (Build)
     1.4.40
 ```
+
+# Inspirations
+
+This language (and most, if not all of its features) is heavily inspired by [Processing](https://processing.org). When I have an idea I want to prototype, I just jump on to the Processing IDE and can get something that just _works_ in a few minutes. 
+
+I admit, Processing isn't the best for many things. It exceeds at image processing, making video filters, and just any general graphics thing. Even while making this language I still come back to Processing for small things I want to test.
+
+My main "issue" with Processing is that it struggles to run on low-end machines. I tried to run a sketch on a Raspberry Pi once and, while it ran at a steady 60 fps on my computer, it ran at a few seconds per frame on the rpi.
+
+It's undeniably slow, but it has just about everything you could need to prototype something quickly, and I love it.
