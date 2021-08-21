@@ -1,4 +1,22 @@
 
-import graphics
+#import graphics
 
+str a = "1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
+int@ l = [0, 0]
+la = l[1]
 
+while (true) {
+    l[0] += 1
+    for (b = 0, b < 2) {
+        if (l[b] == 62) {
+            l[b] = 0
+            l[b + 1] += 1
+        }
+    }
+    if (l[1] == 62)
+        break
+    if (la != l[1]) {
+        print(l[1])
+        la = l[1]
+    }
+}

@@ -96,7 +96,7 @@ let defaultContent = {
     "var": { type: "???" }
 }
 
-// Every operator in CTA is compiled to a function. These are the function names.
+// Every operator in CTA *was* compiled to a function. These *were* the function names.
 let operationFunctions = {
     "+" : "sum", "-" : "sub",
     "*" : "mul", "/" : "div",
@@ -299,11 +299,11 @@ function tokenize(program) {
                 content: c,
                 posInfo: [lineNum + 1, lineNum + 1, lineChar, lineChar]
             })
-        } else if ("=+-*/<>".any(c)) {
+        } else if ("=+-*/<>!".any(c)) {
             let fullNam = c
             c = program[++currentChar]
             lineChar++
-            while ("=+-*/<>".any(c)) {
+            while ("=+-*/<>!".any(c)) {
                 fullNam += c
                 c = program[++currentChar]
                 lineChar++
@@ -643,7 +643,7 @@ function variables(ast) {
             p.arguments = p.arguments.map(e => variables({content: e}).content)
         } else if (formattedVarTypes.includes(p.type)) {
             if (["paren", "arr"].includes(ast.type))
-                error(`Declaration inside of a container`)
+                error(`Declaration inside of a container`, p)
             if (c >= declaredVars.length)
                 error(`Expected something after \`${p.type.replace("Type","")}\``, p)
             if (declaredVars[c].type == "call") {
@@ -712,11 +712,11 @@ function variables(ast) {
                 console.log(declaredVars)
                 continue
             }
-            if (declaredVars[c].type != "opr")
-                error(`No idea what this means.`, declaredVars[c])
-            console.log(declaredVars[c])
-            if (c >= declaredVars.length - 1)
-                error(`Expected something after \`${declaredVars[c].type}\``, declaredVars[c])
+            // if (declaredVars[c].type != "opr")
+            //     error(`No idea what this means.`, declaredVars[c])
+            // console.log(declaredVars[c])
+            // if (c >= declaredVars.length - 1)
+            //     error(`Expected something after \`${declaredVars[c].type}\``, declaredVars[c])
             checkVarName(p.content, "variable", p)
             p.content = {
                 type: declaredVars[c].content,
