@@ -204,7 +204,6 @@ let outputFileName = inputFileName
 if (inputArguments.includes("-o"))
     outputFileName = inputArguments[inputArguments.indexOf("-o") + 1]
 let outputFileType = outputFileName.split(".").slice(-1)[0]
-// if (outputFileType != "--v") console.log(outputFileType)
 
 String.prototype.any = function(c) { return this.includes(c) }
 
